@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TiDB - KAISON 知识库</title>
+    <meta name="description" content="后端开发 & Agent 开发知识汇总">
+    <link rel="stylesheet" href="/kason.github.io/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/kason.github.io/" class="site-title">KAISON 知识库</a>
+            <nav class="site-nav">
+                <a href="/kason.github.io/">首页</a>
+                <a href="https://github.com/hi-kai-fast" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            <article class="knowledge-page">
+    
+    <nav class="breadcrumb">
+        <a href="/kason.github.io/">首页</a>
+        
+        <span class="sep">/</span>
+        <a href="/kason.github.io/#后端知识">后端知识</a>
+        <span class="sep">/</span>
+        <span>数据库</span>
+        
+    </nav>
+    
+
+    <h1 class="page-title">TiDB</h1>
+
+    <div class="page-content">
+        <h2 id="概述">概述</h2>
+
+<p>TiDB 是 PingCAP 开源的分布式 NewSQL 数据库，兼容 MySQL 协议，支持水平扩展、强一致性事务、HTAP（混合事务/分析处理）。</p>
+
+<h2 id="核心架构">核心架构</h2>
+
+<h3 id="三大组件">三大组件</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Client
+  ↓
+TiDB (SQL 层)  →  PD (调度层)
+  ↓               ↑
+TiKV (存储层) ←───┘
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>组件</th>
+      <th>职责</th>
+      <th>特点</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>TiDB Server</strong></td>
+      <td>SQL 解析、优化、执行</td>
+      <td>无状态，可水平扩展</td>
+    </tr>
+    <tr>
+      <td><strong>TiKV</strong></td>
+      <td>数据存储（Key-Value）</td>
+      <td>基于 Raft 的分布式 KV，事务支持</td>
+    </tr>
+    <tr>
+      <td><strong>PD (Placement Driver)</strong></td>
+      <td>元数据管理、调度、时间戳分配</td>
+      <td>集群大脑</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="tiflashhtap-扩展">TiFlash（HTAP 扩展）</h3>
+<ul>
+  <li>列式存储引擎，异步复制 TiKV 数据</li>
+  <li>用于实时分析查询，不影响 OLTP 性能</li>
+</ul>
+
+<h2 id="存储模型">存储模型</h2>
+
+<h3 id="key-value-映射">Key-Value 映射</h3>
+<ul>
+  <li>每张表有主键或隐式 <code class="language-plaintext highlighter-rouge">_tidb_rowid</code></li>
+  <li>Key = <code class="language-plaintext highlighter-rouge">TableID_Prefix + RowID</code></li>
+  <li>Value = 编码后的行数据</li>
+</ul>
+
+<h3 id="region">Region</h3>
+<ul>
+  <li>TiKV 中的数据按 Key 范围划分为 Region</li>
+  <li>默认 96MB 一个 Region</li>
+  <li>PD 负责 Region 的分裂、合并、迁移（负载均衡）</li>
+</ul>
+
+<h2 id="事务模型">事务模型</h2>
+
+<h3 id="mvcc--乐观悲观事务">MVCC + 乐观/悲观事务</h3>
+<ul>
+  <li>基于 Percolator 模型</li>
+  <li>支持 <strong>乐观事务</strong> 和 <strong>悲观事务</strong>（默认悲观）</li>
+  <li>通过 PD 分配全局唯一递增时间戳实现 SI（Snapshot Isolation）</li>
+</ul>
+
+<h3 id="事务流程">事务流程</h3>
+<ol>
+  <li>从 PD 获取 start_ts</li>
+  <li>读取数据（MVCC 快照）</li>
+  <li>写入本地缓存</li>
+  <li>两阶段提交（2PC）：
+    <ul>
+      <li>Prewrite：锁住涉及 Key</li>
+      <li>Commit：获取 commit_ts，提交</li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="与-mysql-兼容性">与 MySQL 兼容性</h2>
+
+<h3 id="兼容">兼容</h3>
+<ul>
+  <li>SQL 语法（SELECT、INSERT、UPDATE、DELETE、DDL）</li>
+  <li>事务（BEGIN、COMMIT、ROLLBACK）</li>
+  <li>预处理语句、JSON 类型</li>
+  <li>大部分 MySQL 内置函数</li>
+</ul>
+
+<h3 id="不兼容">不兼容</h3>
+<ul>
+  <li>存储过程、触发器、视图（部分支持）</li>
+  <li>外键约束（4.0+ 有限支持）</li>
+  <li>部分字符集和排序规则</li>
+  <li>自增 ID 不保证连续（全局唯一但可能跳号）</li>
+</ul>
+
+<h2 id="水平扩展">水平扩展</h2>
+
+<h3 id="扩展存储">扩展存储</h3>
+<ul>
+  <li>增加 TiKV 节点 → PD 自动调度 Region 到新节点</li>
+  <li>线性扩展存储容量</li>
+</ul>
+
+<h3 id="扩展计算">扩展计算</h3>
+<ul>
+  <li>增加 TiDB Server 节点 → 无状态，直接增加并发能力</li>
+  <li>增加 TiFlash 节点 → 提升分析查询能力</li>
+</ul>
+
+<h2 id="数据迁移">数据迁移</h2>
+
+<h3 id="dmdata-migration">DM（Data Migration）</h3>
+<ul>
+  <li>从 MySQL/MariaDB 全量 + 增量迁移到 TiDB</li>
+  <li>支持分表合并</li>
+</ul>
+
+<h3 id="tidb-lightning">TiDB Lightning</h3>
+<ul>
+  <li>快速全量导入（适用于大数据量初始化）</li>
+  <li>支持本地文件或 SQL dump</li>
+</ul>
+
+<h3 id="ticdc">TiCDC</h3>
+<ul>
+  <li>TiDB 增量数据变更捕获</li>
+  <li>同步到 Kafka、MySQL、其他 TiDB 集群</li>
+</ul>
+
+<h2 id="htap-场景">HTAP 场景</h2>
+
+<h3 id="tiflash-实时分析">TiFlash 实时分析</h3>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">-- 强制使用 TiFlash（列存）执行</span>
+<span class="k">SELECT</span> <span class="cm">/*+ read_from_storage(tiflash[table_name]) */</span>
+    <span class="nb">date</span><span class="p">(</span><span class="n">created_at</span><span class="p">),</span> <span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">),</span> <span class="k">SUM</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
+<span class="k">FROM</span> <span class="n">orders</span>
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="nb">date</span><span class="p">(</span><span class="n">created_at</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="mpp-模式50">MPP 模式（5.0+）</h3>
+<ul>
+  <li>TiFlash 节点之间并行计算</li>
+  <li>大幅提升分析查询性能</li>
+</ul>
+
+<h2 id="运维监控">运维监控</h2>
+
+<h3 id="tiup">TiUP</h3>
+<ul>
+  <li>官方部署管理工具</li>
+  <li>一键部署、扩容、缩容、升级</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tiup cluster deploy my-cluster v7.0.0 topology.yaml
+tiup cluster start my-cluster
+tiup cluster scale-out my-cluster scale.yaml
+</code></pre></div></div>
+
+<h3 id="grafana-监控">Grafana 监控</h3>
+<ul>
+  <li>内置 Dashboard 监控各组件指标</li>
+  <li>慢查询日志：<code class="language-plaintext highlighter-rouge">ADMIN SHOW SLOW</code></li>
+</ul>
+
+<h2 id="常见面试题">常见面试题</h2>
+
+<ol>
+  <li>TiDB 的整体架构？</li>
+  <li>TiDB 和 MySQL 的区别？</li>
+  <li>TiDB 如何实现分布式事务？</li>
+  <li>Region 是什么？PD 如何调度？</li>
+  <li>什么是 HTAP？TiFlash 的作用？</li>
+</ol>
+
+<h2 id="参考资料">参考资料</h2>
+
+<ul>
+  <li><a href="https://docs.pingcap.com/zh/tidb/stable">TiDB 官方文档</a></li>
+  <li><a href="https://pingcap.com/zh/tidb-source-code-reading/">TiDB 源码阅读</a></li>
+</ul>
+
+    </div>
+
+    <nav class="page-nav">
+        <a href="/kason.github.io/">&larr; 返回首页</a>
+    </nav>
+</article>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 KAISON 知识库</p>
+        </div>
+    </footer>
+</body>
+</html>

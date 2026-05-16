@@ -1,0 +1,17 @@
+title: "KAISON 知识库"
+description: "后端开发 & Agent 开发知识汇总"
+url: "https://mykason.github.io"
+baseurl: "/backend-interview"
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+theme: null
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor

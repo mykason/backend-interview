@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Framework - KAISON 知识库</title>
+    <meta name="description" content="后端开发 & Agent 开发知识汇总">
+    <link rel="stylesheet" href="/kason.github.io/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/kason.github.io/" class="site-title">KAISON 知识库</a>
+            <nav class="site-nav">
+                <a href="/kason.github.io/">首页</a>
+                <a href="https://github.com/hi-kai-fast" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            <article class="knowledge-page">
+    
+    <nav class="breadcrumb">
+        <a href="/kason.github.io/">首页</a>
+        
+        <span class="sep">/</span>
+        <a href="/kason.github.io/#后端知识">后端知识</a>
+        <span class="sep">/</span>
+        <span>框架</span>
+        
+    </nav>
+    
+
+    <h1 class="page-title">Spring Framework</h1>
+
+    <div class="page-content">
+        <h2 id="概述">概述</h2>
+
+<p>Spring Framework 是 Java 企业级应用开发的基础框架，提供 IoC 容器、AOP、数据访问、Web MVC 等全面的基础设施支持。</p>
+
+<h2 id="ioc控制反转">IoC（控制反转）</h2>
+
+<h3 id="核心概念">核心概念</h3>
+<ul>
+  <li><strong>IoC 容器</strong>：负责对象的创建、装配和生命周期管理</li>
+  <li><strong>Bean</strong>：由 Spring 容器管理的对象</li>
+  <li><strong>依赖注入（DI）</strong>：容器自动注入对象所需的依赖</li>
+</ul>
+
+<h3 id="注入方式">注入方式</h3>
+<ul>
+  <li>构造器注入（推荐）</li>
+  <li>Setter 注入</li>
+  <li>字段注入（@Autowired，不推荐）</li>
+</ul>
+
+<h3 id="bean-作用域">Bean 作用域</h3>
+<p>| 作用域 | 说明 |
+|——–|——|
+| singleton | 默认，容器中只有一个实例 |
+| prototype | 每次获取创建新实例 |
+| request | Web 环境，每个 HTTP 请求一个 |
+| session | Web 环境，每个 Session 一个 |</p>
+
+<h3 id="bean-生命周期">Bean 生命周期</h3>
+<ol>
+  <li>实例化（Instantiation）</li>
+  <li>属性赋值（Populate properties）</li>
+  <li>BeanNameAware / BeanFactoryAware</li>
+  <li>BeanPostProcessor.postProcessBeforeInitialization</li>
+  <li>InitializingBean.afterPropertiesSet / @PostConstruct</li>
+  <li>init-method</li>
+  <li>BeanPostProcessor.postProcessAfterInitialization</li>
+  <li>使用</li>
+  <li>DisposableBean.destroy / @PreDestroy</li>
+  <li>destroy-method</li>
+</ol>
+
+<h2 id="aop面向切面编程">AOP（面向切面编程）</h2>
+
+<h3 id="核心术语">核心术语</h3>
+<ul>
+  <li><strong>切面（Aspect）</strong>：横切关注点的模块化</li>
+  <li><strong>连接点（JoinPoint）</strong>：程序执行的某个点（方法调用）</li>
+  <li><strong>切入点（Pointcut）</strong>：匹配连接点的表达式</li>
+  <li><strong>通知（Advice）</strong>：在切入点执行的动作
+    <ul>
+      <li>@Before、@After、@AfterReturning、@AfterThrowing、@Around</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="实现原理">实现原理</h3>
+<ul>
+  <li><strong>JDK 动态代理</strong>：基于接口，目标类必须实现接口</li>
+  <li><strong>CGLIB 代理</strong>：基于继承，生成目标类的子类</li>
+</ul>
+
+<h3 id="切入点表达式">切入点表达式</h3>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Pointcut</span><span class="o">(</span><span class="s">"execution(* com.example.service.*.*(..))"</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h2 id="事务管理">事务管理</h2>
+
+<h3 id="声明式事务transactional">声明式事务（@Transactional）</h3>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Transactional</span><span class="o">(</span><span class="n">propagation</span> <span class="o">=</span> <span class="nc">Propagation</span><span class="o">.</span><span class="na">REQUIRED</span><span class="o">,</span> <span class="n">isolation</span> <span class="o">=</span> <span class="nc">Isolation</span><span class="o">.</span><span class="na">READ_COMMITTED</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">transfer</span><span class="o">(</span><span class="nc">Account</span> <span class="n">from</span><span class="o">,</span> <span class="nc">Account</span> <span class="n">to</span><span class="o">,</span> <span class="nc">BigDecimal</span> <span class="n">amount</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// ...</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="事务传播行为">事务传播行为</h3>
+<p>| 传播行为 | 说明 |
+|———-|——|
+| REQUIRED | 默认，有事务加入，无事务新建 |
+| REQUIRES_NEW | 始终新建事务，挂起当前事务 |
+| NESTED | 嵌套事务（保存点） |
+| SUPPORTS | 有事务加入，无事务非事务执行 |
+| NOT_SUPPORTED | 非事务执行，挂起当前事务 |
+| MANDATORY | 必须在事务中，否则抛异常 |
+| NEVER | 非事务执行，存在事务则抛异常 |</p>
+
+<h3 id="事务失效场景">事务失效场景</h3>
+<ol>
+  <li>方法非 public</li>
+  <li>自调用（同类中方法 A 调方法 B，B 的事务不生效）</li>
+  <li>异常被 catch 未抛出</li>
+  <li>默认只对 RuntimeException 回滚</li>
+</ol>
+
+<h2 id="自动配置原理">自动配置原理</h2>
+
+<h3 id="springbootapplication-组合注解">@SpringBootApplication 组合注解</h3>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@SpringBootConfiguration</code>：标识配置类</li>
+  <li><code class="language-plaintext highlighter-rouge">@EnableAutoConfiguration</code>：启用自动配置</li>
+  <li><code class="language-plaintext highlighter-rouge">@ComponentScan</code>：组件扫描</li>
+</ul>
+
+<h3 id="自动配置流程">自动配置流程</h3>
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">@EnableAutoConfiguration</code> 通过 <code class="language-plaintext highlighter-rouge">@Import(AutoConfigurationImportSelector.class)</code> 导入</li>
+  <li>读取 <code class="language-plaintext highlighter-rouge">META-INF/spring.factories</code>（Spring Boot 2.x）或 <code class="language-plaintext highlighter-rouge">META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code>（Spring Boot 3.x）</li>
+  <li>根据 @Conditional 系列注解条件过滤</li>
+</ol>
+
+<h2 id="循环依赖">循环依赖</h2>
+
+<h3 id="三级缓存">三级缓存</h3>
+<ol>
+  <li><strong>singletonObjects</strong>：完整 Bean</li>
+  <li><strong>earlySingletonObjects</strong>：早期引用（未完成初始化）</li>
+  <li><strong>singletonFactories</strong>：Bean 工厂</li>
+</ol>
+
+<h3 id="解决流程a--b--a">解决流程（A → B → A）</h3>
+<ol>
+  <li>A 实例化后，将 A 的工厂放入三级缓存</li>
+  <li>A 注入 B，触发 B 的创建</li>
+  <li>B 注入 A，从三级缓存获取 A 的早期引用</li>
+  <li>B 创建完成，A 完成注入</li>
+</ol>
+
+<blockquote>
+  <p>构造器注入的循环依赖无法解决，需用 @Lazy。</p>
+</blockquote>
+
+<h2 id="常见面试题">常见面试题</h2>
+
+<ol>
+  <li>Spring IoC 的理解？Bean 的生命周期？</li>
+  <li>Spring AOP 的实现原理？</li>
+  <li>@Transactional 事务失效的场景？</li>
+  <li>Spring 如何解决循环依赖？</li>
+  <li>Spring Boot 自动配置原理？</li>
+</ol>
+
+<h2 id="参考资料">参考资料</h2>
+
+<ul>
+  <li><a href="https://docs.spring.io/spring-framework/reference/">Spring 官方文档</a></li>
+</ul>
+
+    </div>
+
+    <nav class="page-nav">
+        <a href="/kason.github.io/">&larr; 返回首页</a>
+    </nav>
+</article>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 KAISON 知识库</p>
+        </div>
+    </footer>
+</body>
+</html>

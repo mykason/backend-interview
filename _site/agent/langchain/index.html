@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain - KAISON 知识库</title>
+    <meta name="description" content="后端开发 & Agent 开发知识汇总">
+    <link rel="stylesheet" href="/kason.github.io/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/kason.github.io/" class="site-title">KAISON 知识库</a>
+            <nav class="site-nav">
+                <a href="/kason.github.io/">首页</a>
+                <a href="https://github.com/hi-kai-fast" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            <article class="knowledge-page">
+    
+    <nav class="breadcrumb">
+        <a href="/kason.github.io/">首页</a>
+        
+        <span class="sep">/</span>
+        <span>Agent 开发</span>
+        
+    </nav>
+    
+
+    <h1 class="page-title">LangChain</h1>
+
+    <div class="page-content">
+        <h2 id="概述">概述</h2>
+
+<p>LangChain 是一个用于构建 LLM 应用的开发框架，提供了模型调用、提示词管理、链式调用、记忆、工具调用、RAG 等核心抽象，加速 AI 应用开发。</p>
+
+<h2 id="核心模块">核心模块</h2>
+
+<h3 id="1-model-io模型交互">1. Model I/O（模型交互）</h3>
+
+<h4 id="chat-models">Chat Models</h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_openai</span> <span class="kn">import</span> <span class="n">ChatOpenAI</span>
+
+<span class="n">llm</span> <span class="o">=</span> <span class="n">ChatOpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s">"gpt-4"</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">llm</span><span class="p">.</span><span class="n">invoke</span><span class="p">(</span><span class="s">"什么是向量数据库？"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="prompt-templates">Prompt Templates</h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_core.prompts</span> <span class="kn">import</span> <span class="n">ChatPromptTemplate</span>
+
+<span class="n">prompt</span> <span class="o">=</span> <span class="n">ChatPromptTemplate</span><span class="p">.</span><span class="n">from_messages</span><span class="p">([</span>
+    <span class="p">(</span><span class="s">"system"</span><span class="p">,</span> <span class="s">"你是一个{role}。"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">"human"</span><span class="p">,</span> <span class="s">"{question}"</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="n">chain</span> <span class="o">=</span> <span class="n">prompt</span> <span class="o">|</span> <span class="n">llm</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">chain</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span><span class="s">"role"</span><span class="p">:</span> <span class="s">"技术专家"</span><span class="p">,</span> <span class="s">"question"</span><span class="p">:</span> <span class="s">"解释微服务架构"</span><span class="p">})</span>
+</code></pre></div></div>
+
+<h3 id="2-chains链">2. Chains（链）</h3>
+
+<h4 id="lcellangchain-expression-language">LCEL（LangChain Expression Language）</h4>
+<ul>
+  <li>使用 <code class="language-plaintext highlighter-rouge">|</code> 管道操作符组合组件</li>
+  <li>支持流式输出、批处理、异步</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">chain</span> <span class="o">=</span> <span class="n">prompt</span> <span class="o">|</span> <span class="n">llm</span> <span class="o">|</span> <span class="n">output_parser</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">chain</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span><span class="s">"role"</span><span class="p">:</span> <span class="s">"助手"</span><span class="p">,</span> <span class="s">"question"</span><span class="p">:</span> <span class="s">"你好"</span><span class="p">})</span>
+</code></pre></div></div>
+
+<h3 id="3-rag检索增强生成">3. RAG（检索增强生成）</h3>
+
+<h4 id="基本流程">基本流程</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>文档 → 分割 → Embedding → 向量存储 → 检索 → 注入 Prompt → LLM 生成
+</code></pre></div></div>
+
+<h4 id="文档加载与分割">文档加载与分割</h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_community.document_loaders</span> <span class="kn">import</span> <span class="n">TextLoader</span>
+<span class="kn">from</span> <span class="nn">langchain_text_splitters</span> <span class="kn">import</span> <span class="n">RecursiveCharacterTextSplitter</span>
+
+<span class="n">loader</span> <span class="o">=</span> <span class="n">TextLoader</span><span class="p">(</span><span class="s">"knowledge.txt"</span><span class="p">)</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">()</span>
+
+<span class="n">splitter</span> <span class="o">=</span> <span class="n">RecursiveCharacterTextSplitter</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">chunks</span> <span class="o">=</span> <span class="n">splitter</span><span class="p">.</span><span class="n">split_documents</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="向量存储">向量存储</h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_community.vectorstores</span> <span class="kn">import</span> <span class="n">Chroma</span>
+<span class="kn">from</span> <span class="nn">langchain_openai</span> <span class="kn">import</span> <span class="n">OpenAIEmbeddings</span>
+
+<span class="n">vectorstore</span> <span class="o">=</span> <span class="n">Chroma</span><span class="p">.</span><span class="n">from_documents</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">OpenAIEmbeddings</span><span class="p">())</span>
+<span class="n">retriever</span> <span class="o">=</span> <span class="n">vectorstore</span><span class="p">.</span><span class="n">as_retriever</span><span class="p">(</span><span class="n">search_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s">"k"</span><span class="p">:</span> <span class="mi">3</span><span class="p">})</span>
+</code></pre></div></div>
+
+<h4 id="rag-chain">RAG Chain</h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_core.output_parsers</span> <span class="kn">import</span> <span class="n">StrOutputParser</span>
+<span class="kn">from</span> <span class="nn">langchain_core.runnables</span> <span class="kn">import</span> <span class="n">RunnablePassthrough</span>
+
+<span class="n">template</span> <span class="o">=</span> <span class="s">"""基于以下上下文回答问题：
+{context}
+
+问题：{question}
+"""</span>
+<span class="n">rag_prompt</span> <span class="o">=</span> <span class="n">ChatPromptTemplate</span><span class="p">.</span><span class="n">from_template</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">format_docs</span><span class="p">(</span><span class="n">docs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">doc</span><span class="p">.</span><span class="n">page_content</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">)</span>
+
+<span class="n">rag_chain</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">{</span><span class="s">"context"</span><span class="p">:</span> <span class="n">retriever</span> <span class="o">|</span> <span class="n">format_docs</span><span class="p">,</span> <span class="s">"question"</span><span class="p">:</span> <span class="n">RunnablePassthrough</span><span class="p">()}</span>
+    <span class="o">|</span> <span class="n">rag_prompt</span>
+    <span class="o">|</span> <span class="n">llm</span>
+    <span class="o">|</span> <span class="n">StrOutputParser</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">rag_chain</span><span class="p">.</span><span class="n">invoke</span><span class="p">(</span><span class="s">"什么是微服务？"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="4-agents智能体">4. Agents（智能体）</h3>
+
+<h4 id="tool-定义">Tool 定义</h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_core.tools</span> <span class="kn">import</span> <span class="n">tool</span>
+
+<span class="o">@</span><span class="n">tool</span>
+<span class="k">def</span> <span class="nf">search_weather</span><span class="p">(</span><span class="n">city</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="s">"""查询指定城市的天气"""</span>
+    <span class="c1"># 实际调用天气 API
+</span>    <span class="k">return</span> <span class="sa">f</span><span class="s">"</span><span class="si">{</span><span class="n">city</span><span class="si">}</span><span class="s">今天晴，25°C"</span>
+
+<span class="o">@</span><span class="n">tool</span>
+<span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="s">"""计算数学表达式"""</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="n">expression</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h4 id="react-agent">ReAct Agent</h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain.agents</span> <span class="kn">import</span> <span class="n">create_react_agent</span>
+
+<span class="n">tools</span> <span class="o">=</span> <span class="p">[</span><span class="n">search_weather</span><span class="p">,</span> <span class="n">calculate</span><span class="p">]</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">create_react_agent</span><span class="p">(</span><span class="n">llm</span><span class="p">,</span> <span class="n">tools</span><span class="p">,</span> <span class="n">prompt</span><span class="p">)</span>
+<span class="n">agent_executor</span> <span class="o">=</span> <span class="n">AgentExecutor</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">agent_executor</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span><span class="s">"input"</span><span class="p">:</span> <span class="s">"北京天气如何？"</span><span class="p">})</span>
+</code></pre></div></div>
+
+<h3 id="5-memory记忆">5. Memory（记忆）</h3>
+
+<h4 id="对话历史管理">对话历史管理</h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_core.messages</span> <span class="kn">import</span> <span class="n">HumanMessage</span><span class="p">,</span> <span class="n">AIMessage</span>
+<span class="kn">from</span> <span class="nn">langgraph.graph.message</span> <span class="kn">import</span> <span class="n">add_messages</span>
+
+<span class="c1"># 使用消息列表管理对话历史
+</span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">HumanMessage</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="s">"你好"</span><span class="p">),</span>
+    <span class="n">AIMessage</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="s">"你好！有什么可以帮你的？"</span><span class="p">),</span>
+<span class="p">]</span>
+</code></pre></div></div>
+
+<h2 id="与-langgraph-的关系">与 LangGraph 的关系</h2>
+
+<ul>
+  <li><strong>LangChain</strong>：提供基础组件（模型、工具、提示词）</li>
+  <li><strong>LangGraph</strong>：在 LangChain 之上提供有状态的 Agent 编排</li>
+</ul>
+
+<h2 id="常见面试题">常见面试题</h2>
+
+<ol>
+  <li>LangChain 的核心模块有哪些？</li>
+  <li>RAG 的原理和实现流程？</li>
+  <li>LCEL 管道操作符的优势？</li>
+  <li>Agent 和 Chain 的区别？</li>
+  <li>如何优化 RAG 的检索效果？</li>
+</ol>
+
+<h2 id="参考资料">参考资料</h2>
+
+<ul>
+  <li><a href="https://python.langchain.com/">LangChain 官方文档</a></li>
+  <li><a href="https://github.com/langchain-ai/langchain">LangChain GitHub</a></li>
+</ul>
+
+    </div>
+
+    <nav class="page-nav">
+        <a href="/kason.github.io/">&larr; 返回首页</a>
+    </nav>
+</article>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 KAISON 知识库</p>
+        </div>
+    </footer>
+</body>
+</html>

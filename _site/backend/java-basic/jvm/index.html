@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JVM - KAISON 知识库</title>
+    <meta name="description" content="后端开发 & Agent 开发知识汇总">
+    <link rel="stylesheet" href="/kason.github.io/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/kason.github.io/" class="site-title">KAISON 知识库</a>
+            <nav class="site-nav">
+                <a href="/kason.github.io/">首页</a>
+                <a href="https://github.com/hi-kai-fast" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            <article class="knowledge-page">
+    
+    <nav class="breadcrumb">
+        <a href="/kason.github.io/">首页</a>
+        
+        <span class="sep">/</span>
+        <a href="/kason.github.io/#后端知识">后端知识</a>
+        <span class="sep">/</span>
+        <span>JAVA 基础</span>
+        
+    </nav>
+    
+
+    <h1 class="page-title">JVM</h1>
+
+    <div class="page-content">
+        <h2 id="概述">概述</h2>
+
+<p>JVM（Java Virtual Machine）是 Java 程序运行的虚拟机，负责将字节码翻译成机器码执行，提供跨平台能力和自动内存管理。</p>
+
+<h2 id="内存结构">内存结构</h2>
+
+<h3 id="运行时数据区">运行时数据区</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>区域</th>
+      <th>线程共享</th>
+      <th>说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>堆（Heap）</td>
+      <td>是</td>
+      <td>存放对象实例，GC 主要管理区域</td>
+    </tr>
+    <tr>
+      <td>方法区（Method Area）</td>
+      <td>是</td>
+      <td>存放类信息、常量、静态变量</td>
+    </tr>
+    <tr>
+      <td>虚拟机栈（VM Stack）</td>
+      <td>否</td>
+      <td>每个方法一个栈帧（局部变量表、操作数栈等）</td>
+    </tr>
+    <tr>
+      <td>本地方法栈（Native Stack）</td>
+      <td>否</td>
+      <td>为 Native 方法服务</td>
+    </tr>
+    <tr>
+      <td>程序计数器（PC Register）</td>
+      <td>否</td>
+      <td>记录当前线程执行的字节码行号</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="jdk-8-内存模型变化">JDK 8 内存模型变化</h3>
+<ul>
+  <li>永久代（PermGen）→ 元空间（Metaspace）</li>
+  <li>元空间使用本地内存，不再受 JVM 堆大小限制</li>
+</ul>
+
+<h2 id="垃圾回收gc">垃圾回收（GC）</h2>
+
+<h3 id="如何判断对象可回收">如何判断对象可回收</h3>
+<ul>
+  <li><strong>引用计数法</strong>：循环引用问题</li>
+  <li><strong>可达性分析</strong>：从 GC Roots 出发，不可达的对象可回收</li>
+</ul>
+
+<h3 id="gc-roots-包括">GC Roots 包括</h3>
+<ul>
+  <li>虚拟机栈中引用的对象</li>
+  <li>方法区中类静态属性引用的对象</li>
+  <li>方法区中常量引用的对象</li>
+  <li>本地方法栈中 JNI 引用的对象</li>
+</ul>
+
+<h3 id="垃圾回收算法">垃圾回收算法</h3>
+<ul>
+  <li><strong>标记-清除</strong>：产生碎片</li>
+  <li><strong>标记-整理</strong>：移动对象，无碎片但开销大</li>
+  <li><strong>复制算法</strong>：两块区域来回复制，适合新生代</li>
+  <li><strong>分代收集</strong>：新生代用复制，老年代用标记-整理</li>
+</ul>
+
+<h3 id="常见垃圾回收器">常见垃圾回收器</h3>
+<p>| 回收器 | 算法 | 适用区域 | 特点 |
+|——–|——|———-|——|
+| Serial | 复制 | 新生代 | 单线程，Client 模式默认 |
+| ParNew | 复制 | 新生代 | Serial 多线程版 |
+| Parallel Scavenge | 复制 | 新生代 | 吞吐量优先 |
+| CMS | 标记-清除 | 老年代 | 低延迟，有碎片问题 |
+| G1 | 分区收集 | 全堆 | JDK 9 默认，可预测停顿 |
+| ZGC | 着色指针 | 全堆 | 超低延迟（&lt;10ms） |</p>
+
+<h2 id="类加载机制">类加载机制</h2>
+
+<h3 id="类加载过程">类加载过程</h3>
+<ol>
+  <li><strong>加载</strong>：读取 class 文件，生成 Class 对象</li>
+  <li><strong>验证</strong>：校验字节码格式和安全性</li>
+  <li><strong>准备</strong>：为静态变量分配内存并赋默认值</li>
+  <li><strong>解析</strong>：将常量池符号引用替换为直接引用</li>
+  <li><strong>初始化</strong>：执行 <code class="language-plaintext highlighter-rouge">&lt;clinit&gt;()</code> 方法</li>
+</ol>
+
+<h3 id="双亲委派模型">双亲委派模型</h3>
+<ul>
+  <li>自底向上检查是否已加载，自顶向下尝试加载</li>
+  <li>Bootstrap → Extension → Application ClassLoader</li>
+  <li>可自定义 ClassLoader 打破双亲委派</li>
+</ul>
+
+<h2 id="jvm-调优常用参数">JVM 调优常用参数</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 堆大小</span>
+<span class="nt">-Xms512m</span> <span class="nt">-Xmx2g</span>
+
+<span class="c"># 新生代大小</span>
+<span class="nt">-Xmn256m</span>
+
+<span class="c"># 元空间大小</span>
+<span class="nt">-XX</span>:MetaspaceSize<span class="o">=</span>256m <span class="nt">-XX</span>:MaxMetaspaceSize<span class="o">=</span>512m
+
+<span class="c"># GC 日志</span>
+<span class="nt">-Xlog</span>:gc<span class="k">*</span>:file<span class="o">=</span>gc.log
+
+<span class="c"># 使用 G1 收集器</span>
+<span class="nt">-XX</span>:+UseG1GC
+</code></pre></div></div>
+
+<h2 id="常见面试题">常见面试题</h2>
+
+<ol>
+  <li>JVM 内存模型是怎样的？</li>
+  <li>什么是双亲委派模型？为什么需要？</li>
+  <li>CMS 和 G1 的区别？</li>
+  <li>什么情况下会发生 OOM？如何排查？</li>
+  <li>JVM 调优的常见手段？</li>
+</ol>
+
+<h2 id="参考资料">参考资料</h2>
+
+<ul>
+  <li>《深入理解 Java 虚拟机》- 周志明</li>
+</ul>
+
+    </div>
+
+    <nav class="page-nav">
+        <a href="/kason.github.io/">&larr; 返回首页</a>
+    </nav>
+</article>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 KAISON 知识库</p>
+        </div>
+    </footer>
+</body>
+</html>

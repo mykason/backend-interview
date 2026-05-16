@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Cloud - KAISON 知识库</title>
+    <meta name="description" content="后端开发 & Agent 开发知识汇总">
+    <link rel="stylesheet" href="/kason.github.io/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/kason.github.io/" class="site-title">KAISON 知识库</a>
+            <nav class="site-nav">
+                <a href="/kason.github.io/">首页</a>
+                <a href="https://github.com/hi-kai-fast" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            <article class="knowledge-page">
+    
+    <nav class="breadcrumb">
+        <a href="/kason.github.io/">首页</a>
+        
+        <span class="sep">/</span>
+        <a href="/kason.github.io/#后端知识">后端知识</a>
+        <span class="sep">/</span>
+        <span>框架</span>
+        
+    </nav>
+    
+
+    <h1 class="page-title">Spring Cloud</h1>
+
+    <div class="page-content">
+        <h2 id="概述">概述</h2>
+
+<p>Spring Cloud 是基于 Spring Boot 的微服务框架，提供服务注册发现、配置管理、负载均衡、熔断器、网关等微服务基础设施。</p>
+
+<h2 id="核心组件">核心组件</h2>
+
+<h3 id="服务注册与发现">服务注册与发现</h3>
+
+<h4 id="nacos推荐">Nacos（推荐）</h4>
+<ul>
+  <li>阿里开源，同时支持 AP/CP 模式</li>
+  <li>集服务注册、配置中心于一体</li>
+  <li>支持DNS和HTTP服务发现</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># application.yml</span>
+<span class="na">spring</span><span class="pi">:</span>
+  <span class="na">cloud</span><span class="pi">:</span>
+    <span class="na">nacos</span><span class="pi">:</span>
+      <span class="na">discovery</span><span class="pi">:</span>
+        <span class="na">server-addr</span><span class="pi">:</span> <span class="s">localhost:8848</span>
+      <span class="na">config</span><span class="pi">:</span>
+        <span class="na">server-addr</span><span class="pi">:</span> <span class="s">localhost:8848</span>
+        <span class="na">file-extension</span><span class="pi">:</span> <span class="s">yaml</span>
+</code></pre></div></div>
+
+<h4 id="eurekanetflix已停更">Eureka（Netflix，已停更）</h4>
+<ul>
+  <li>AP 模式，保证可用性</li>
+  <li>自我保护机制：心跳失败比例过高时不再剔除服务</li>
+</ul>
+
+<h3 id="配置中心">配置中心</h3>
+
+<h4 id="nacos-config">Nacos Config</h4>
+<ul>
+  <li>支持动态配置推送，实时生效</li>
+  <li>支持 YAML、Properties、JSON 等格式</li>
+  <li>按 Data ID + Group 管理配置</li>
+</ul>
+
+<h4 id="spring-cloud-config">Spring Cloud Config</h4>
+<ul>
+  <li>基于 Git 仓库的集中配置管理</li>
+  <li>支持配置加密/解密</li>
+</ul>
+
+<h3 id="负载均衡">负载均衡</h3>
+
+<h4 id="spring-cloud-loadbalancer替代-ribbon">Spring Cloud LoadBalancer（替代 Ribbon）</h4>
+<ul>
+  <li>轮询（RoundRobin）</li>
+  <li>随机（Random）</li>
+  <li>自定义策略</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Bean</span>
+<span class="nd">@LoadBalanced</span>
+<span class="kd">public</span> <span class="nc">RestTemplate</span> <span class="nf">restTemplate</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">RestTemplate</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="服务调用">服务调用</h3>
+
+<h4 id="openfeign">OpenFeign</h4>
+<ul>
+  <li>声明式 HTTP 客户端，结合负载均衡</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@FeignClient</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"user-service"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">UserClient</span> <span class="o">{</span>
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/api/users/{id}"</span><span class="o">)</span>
+    <span class="nc">User</span> <span class="nf">getUser</span><span class="o">(</span><span class="nd">@PathVariable</span><span class="o">(</span><span class="s">"id"</span><span class="o">)</span> <span class="nc">Long</span> <span class="n">id</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="熔断与降级">熔断与降级</h3>
+
+<h4 id="sentinel推荐">Sentinel（推荐）</h4>
+<ul>
+  <li>阿里开源，轻量级流量控制组件</li>
+  <li>支持流控、熔断、系统保护、热点限流</li>
+  <li>控制台实时监控</li>
+</ul>
+
+<h4 id="resilience4j">Resilience4j</h4>
+<ul>
+  <li>轻量级、函数式</li>
+  <li>支持 Circuit Breaker、Rate Limiter、Retry、Bulkhead</li>
+</ul>
+
+<h3 id="api-网关">API 网关</h3>
+
+<h4 id="spring-cloud-gateway">Spring Cloud Gateway</h4>
+<ul>
+  <li>基于 WebFlux（Netty），非阻塞</li>
+  <li>核心：Route + Predicate + Filter</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">spring</span><span class="pi">:</span>
+  <span class="na">cloud</span><span class="pi">:</span>
+    <span class="na">gateway</span><span class="pi">:</span>
+      <span class="na">routes</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">id</span><span class="pi">:</span> <span class="s">user-service</span>
+          <span class="na">uri</span><span class="pi">:</span> <span class="s">lb://user-service</span>
+          <span class="na">predicates</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="s">Path=/api/users/**</span>
+          <span class="na">filters</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="s">StripPrefix=0</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">CircuitBreaker</span>
+              <span class="na">args</span><span class="pi">:</span>
+                <span class="na">name</span><span class="pi">:</span> <span class="s">userCircuitBreaker</span>
+</code></pre></div></div>
+
+<h3 id="分布式事务">分布式事务</h3>
+
+<h4 id="seata">Seata</h4>
+<ul>
+  <li>支持 AT、TCC、Saga、XA 模式</li>
+  <li>AT 模式最常用，对业务无侵入</li>
+</ul>
+
+<h2 id="微服务架构参考">微服务架构参考</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Client → Gateway → [Service A, Service B, Service C]
+                      ↓              ↓
+                    Nacos (注册中心 &amp; 配置中心)
+                      ↓
+                    Sentinel (熔断限流)
+</code></pre></div></div>
+
+<h2 id="版本对应关系">版本对应关系</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Spring Cloud</th>
+      <th>Spring Boot</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2023.0.x (Leyton)</td>
+      <td>3.2.x</td>
+    </tr>
+    <tr>
+      <td>2022.0.x (Kilburn)</td>
+      <td>3.0.x</td>
+    </tr>
+    <tr>
+      <td>2021.0.x (Jubilee)</td>
+      <td>2.6.x - 3.0.x</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="常见面试题">常见面试题</h2>
+
+<ol>
+  <li>微服务的优缺点？</li>
+  <li>Spring Cloud 各组件的作用？</li>
+  <li>服务注册发现原理？</li>
+  <li>熔断器的工作原理（三种状态）？</li>
+  <li>分布式事务的解决方案？</li>
+</ol>
+
+<h2 id="参考资料">参考资料</h2>
+
+<ul>
+  <li><a href="https://spring.io/projects/spring-cloud">Spring Cloud 官方文档</a></li>
+  <li><a href="https://nacos.io/zh-cn/docs/what-is-nacos.html">Nacos 官方文档</a></li>
+</ul>
+
+    </div>
+
+    <nav class="page-nav">
+        <a href="/kason.github.io/">&larr; 返回首页</a>
+    </nav>
+</article>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 KAISON 知识库</p>
+        </div>
+    </footer>
+</body>
+</html>

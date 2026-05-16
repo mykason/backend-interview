@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elasticsearch - KAISON 知识库</title>
+    <meta name="description" content="后端开发 & Agent 开发知识汇总">
+    <link rel="stylesheet" href="/kason.github.io/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/kason.github.io/" class="site-title">KAISON 知识库</a>
+            <nav class="site-nav">
+                <a href="/kason.github.io/">首页</a>
+                <a href="https://github.com/hi-kai-fast" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            <article class="knowledge-page">
+    
+    <nav class="breadcrumb">
+        <a href="/kason.github.io/">首页</a>
+        
+        <span class="sep">/</span>
+        <a href="/kason.github.io/#后端知识">后端知识</a>
+        <span class="sep">/</span>
+        <span>数据库</span>
+        
+    </nav>
+    
+
+    <h1 class="page-title">Elasticsearch</h1>
+
+    <div class="page-content">
+        <h2 id="概述">概述</h2>
+
+<p>Elasticsearch 是一个基于 Lucene 的分布式搜索和分析引擎，擅长全文检索、日志分析、实时数据分析等场景。</p>
+
+<h2 id="核心概念">核心概念</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Elasticsearch</th>
+      <th>关系型数据库</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Index</td>
+      <td>Database</td>
+    </tr>
+    <tr>
+      <td>Type（已废弃）</td>
+      <td>Table</td>
+    </tr>
+    <tr>
+      <td>Document</td>
+      <td>Row</td>
+    </tr>
+    <tr>
+      <td>Field</td>
+      <td>Column</td>
+    </tr>
+    <tr>
+      <td>Mapping</td>
+      <td>Schema</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="document文档">Document（文档）</h3>
+<ul>
+  <li>JSON 格式</li>
+  <li>每个 document 有唯一 <code class="language-plaintext highlighter-rouge">_id</code></li>
+  <li>属于某个 Index</li>
+</ul>
+
+<h3 id="mapping映射">Mapping（映射）</h3>
+<ul>
+  <li>定义字段的类型和分析方式</li>
+  <li>动态映射（自动推断）和显式映射（手动定义）</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT</span><span class="w"> </span><span class="err">/products</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"mappings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nl">"analyzer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ik_max_word"</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"price"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"double"</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"keyword"</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"created"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"date"</span><span class="w"> </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="倒排索引">倒排索引</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>文档1: "Elasticsearch 是搜索引擎"
+文档2: "搜索引擎用于全文检索"
+
+Term         | Doc IDs
+-------------|--------
+elasticsearch| [1]
+搜索引擎      | [1, 2]
+全文检索      | [2]
+</code></pre></div></div>
+
+<ul>
+  <li>正排索引：文档 → 词</li>
+  <li>倒排索引：词 → 文档（ES 的核心数据结构）</li>
+</ul>
+
+<h2 id="分词器analyzer">分词器（Analyzer）</h2>
+
+<h3 id="组成">组成</h3>
+<ol>
+  <li><strong>Character Filters</strong>：预处理（HTML 去除等）</li>
+  <li><strong>Tokenizer</strong>：分词</li>
+  <li><strong>Token Filters</strong>：词项过滤（小写、同义词等）</li>
+</ol>
+
+<h3 id="常用分词器">常用分词器</h3>
+<p>| 分词器 | 说明 |
+|——–|——|
+| standard | 默认，按单词边界分词 |
+| simple | 按非字母分词，转小写 |
+| whitespace | 按空格分词 |
+| ik_max_word | IK 中文最细粒度分词 |
+| ik_smart | IK 中文智能分词 |</p>
+
+<h2 id="核心查询-dsl">核心查询 DSL</h2>
+
+<h3 id="查询所有">查询所有</h3>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET</span><span class="w"> </span><span class="err">/products/_search</span><span class="w">
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"match_all"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="全文检索">全文检索</h3>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"match"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"搜索引擎"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="精确匹配">精确匹配</h3>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"tags"</span><span class="p">:</span><span class="w"> </span><span class="s2">"electronics"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="复合查询bool">复合查询（bool）</h3>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w"> </span><span class="nl">"match"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"手机"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w"> </span><span class="nl">"range"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"price"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"gte"</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="nl">"lte"</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"should"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w"> </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"brand"</span><span class="p">:</span><span class="w"> </span><span class="s2">"apple"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"must_not"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w"> </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"discontinued"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="聚合分析">聚合分析</h3>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"aggs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"brand_stats"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"brand"</span><span class="p">,</span><span class="w"> </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"price_stats"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"stats"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"price"</span><span class="w"> </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="分布式架构">分布式架构</h2>
+
+<h3 id="分片shard">分片（Shard）</h3>
+<ul>
+  <li><strong>主分片（Primary Shard）</strong>：数据分片，创建后不可修改数量</li>
+  <li><strong>副本分片（Replica Shard）</strong>：主分片拷贝，提供高可用和读扩展</li>
+</ul>
+
+<h3 id="路由规则">路由规则</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>shard = hash(routing) % number_of_primary_shards
+</code></pre></div></div>
+
+<h3 id="写入流程">写入流程</h3>
+<ol>
+  <li>客户端发送请求到协调节点</li>
+  <li>路由到主分片所在节点</li>
+  <li>主分片写入后同步到副本分片</li>
+  <li>返回客户端</li>
+</ol>
+
+<h3 id="搜索流程query-then-fetch">搜索流程（Query Then Fetch）</h3>
+<ol>
+  <li><strong>Query 阶段</strong>：协调节点将请求发给所有分片，各分片返回匹配文档 ID 和排序值</li>
+  <li><strong>Fetch 阶段</strong>：协调节点根据排序值取 top N，从相关分片获取完整文档</li>
+</ol>
+
+<h2 id="与关系型数据库同步">与关系型数据库同步</h2>
+
+<h3 id="canal--kafka">Canal + Kafka</h3>
+<ol>
+  <li>Canal 监听 MySQL binlog</li>
+  <li>发送到 Kafka</li>
+  <li>消费 Kafka 写入 Elasticsearch</li>
+</ol>
+
+<h2 id="性能优化">性能优化</h2>
+
+<ol>
+  <li>合理设置分片数（建议单个分片 10-50GB）</li>
+  <li>使用 filter 替代 query（filter 可缓存）</li>
+  <li>避免深度分页（使用 search_after）</li>
+  <li>预索引字段优化 range 查询</li>
+  <li>使用 bulk 批量操作</li>
+</ol>
+
+<h2 id="常见面试题">常见面试题</h2>
+
+<ol>
+  <li>Elasticsearch 的倒排索引原理？</li>
+  <li>写入和查询的流程？</li>
+  <li>如何实现 MySQL 与 ES 的数据同步？</li>
+  <li>如何优化 Elasticsearch 查询性能？</li>
+  <li>分片和副本的作用？</li>
+</ol>
+
+<h2 id="参考资料">参考资料</h2>
+
+<ul>
+  <li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html">Elasticsearch 官方文档</a></li>
+  <li>《Elasticsearch 权威指南》</li>
+</ul>
+
+    </div>
+
+    <nav class="page-nav">
+        <a href="/kason.github.io/">&larr; 返回首页</a>
+    </nav>
+</article>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 KAISON 知识库</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>集合 - KAISON 知识库</title>
+    <meta name="description" content="后端开发 & Agent 开发知识汇总">
+    <link rel="stylesheet" href="/kason.github.io/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/kason.github.io/" class="site-title">KAISON 知识库</a>
+            <nav class="site-nav">
+                <a href="/kason.github.io/">首页</a>
+                <a href="https://github.com/hi-kai-fast" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            <article class="knowledge-page">
+    
+    <nav class="breadcrumb">
+        <a href="/kason.github.io/">首页</a>
+        
+        <span class="sep">/</span>
+        <a href="/kason.github.io/#后端知识">后端知识</a>
+        <span class="sep">/</span>
+        <span>JAVA 基础</span>
+        
+    </nav>
+    
+
+    <h1 class="page-title">集合</h1>
+
+    <div class="page-content">
+        <h2 id="概述">概述</h2>
+
+<p>Java 集合框架（Java Collections Framework）是 Java 中用于存储和操作一组对象的一套统一架构。</p>
+
+<h2 id="核心接口体系">核心接口体系</h2>
+
+<ul>
+  <li><strong>Collection</strong>：单列集合的根接口</li>
+  <li><strong>Map</strong>：双列（键值对）集合的根接口</li>
+</ul>
+
+<h2 id="list">List</h2>
+
+<h3 id="arraylist">ArrayList</h3>
+<ul>
+  <li>底层基于动态数组实现</li>
+  <li>随机访问快（O(1)），插入/删除慢（O(n)）</li>
+  <li>默认初始容量 10，扩容为原来的 1.5 倍</li>
+  <li>非线程安全</li>
+</ul>
+
+<h3 id="linkedlist">LinkedList</h3>
+<ul>
+  <li>底层基于双向链表实现</li>
+  <li>插入/删除快（O(1)），随机访问慢（O(n)）</li>
+  <li>同时实现了 List 和 Deque 接口</li>
+</ul>
+
+<h3 id="vector">Vector</h3>
+<ul>
+  <li>线程安全的动态数组（方法用 synchronized 修饰）</li>
+  <li>性能较差，一般使用 <code class="language-plaintext highlighter-rouge">Collections.synchronizedList()</code> 或 <code class="language-plaintext highlighter-rouge">CopyOnWriteArrayList</code> 替代</li>
+</ul>
+
+<h2 id="set">Set</h2>
+
+<h3 id="hashset">HashSet</h3>
+<ul>
+  <li>底层基于 HashMap 实现</li>
+  <li>无序，允许 null 元素</li>
+  <li>插入/查找/删除 O(1)</li>
+</ul>
+
+<h3 id="linkedhashset">LinkedHashSet</h3>
+<ul>
+  <li>维护插入顺序的 HashSet</li>
+</ul>
+
+<h3 id="treeset">TreeSet</h3>
+<ul>
+  <li>基于 TreeMap（红黑树）实现</li>
+  <li>元素自然排序或自定义 Comparator 排序</li>
+</ul>
+
+<h2 id="map">Map</h2>
+
+<h3 id="hashmap">HashMap</h3>
+<ul>
+  <li>底层：数组 + 链表 + 红黑树（JDK 8+）</li>
+  <li>默认容量 16，负载因子 0.75</li>
+  <li>链表长度 &gt;= 8 且数组长度 &gt;= 64 时转红黑树</li>
+  <li>非线程安全，允许 null key 和 null value</li>
+</ul>
+
+<h3 id="concurrenthashmap">ConcurrentHashMap</h3>
+<ul>
+  <li>线程安全的 HashMap</li>
+  <li>JDK 7：分段锁（Segment）</li>
+  <li>JDK 8+：CAS + synchronized（锁粒度为桶节点）</li>
+</ul>
+
+<h3 id="treemap">TreeMap</h3>
+<ul>
+  <li>基于红黑树实现</li>
+  <li>按 key 自然排序或自定义排序</li>
+</ul>
+
+<h2 id="queue">Queue</h2>
+
+<h3 id="priorityqueue">PriorityQueue</h3>
+<ul>
+  <li>基于堆（数组）实现的优先队列</li>
+  <li>出队顺序按优先级（自然排序或 Comparator）</li>
+</ul>
+
+<h3 id="arraydeque">ArrayDeque</h3>
+<ul>
+  <li>基于循环数组实现的双端队列</li>
+  <li>可作为栈或队列使用，效率高于 LinkedList</li>
+</ul>
+
+<h2 id="常见面试题">常见面试题</h2>
+
+<ol>
+  <li>HashMap 的扩容机制？</li>
+  <li>HashMap 和 Hashtable 的区别？</li>
+  <li>ConcurrentHashMap 如何保证线程安全？</li>
+  <li>ArrayList 的扩容机制？</li>
+  <li>Comparable 和 Comparator 的区别？</li>
+</ol>
+
+<h2 id="参考资料">参考资料</h2>
+
+<ul>
+  <li><a href="https://docs.oracle.com/javase/8/docs/technotes/guides/collections/overview.html">Java 官方文档 - Collections Framework</a></li>
+</ul>
+
+    </div>
+
+    <nav class="page-nav">
+        <a href="/kason.github.io/">&larr; 返回首页</a>
+    </nav>
+</article>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 KAISON 知识库</p>
+        </div>
+    </footer>
+</body>
+</html>

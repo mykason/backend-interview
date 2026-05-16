@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangGraph - KAISON 知识库</title>
+    <meta name="description" content="后端开发 & Agent 开发知识汇总">
+    <link rel="stylesheet" href="/kason.github.io/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/kason.github.io/" class="site-title">KAISON 知识库</a>
+            <nav class="site-nav">
+                <a href="/kason.github.io/">首页</a>
+                <a href="https://github.com/hi-kai-fast" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            <article class="knowledge-page">
+    
+    <nav class="breadcrumb">
+        <a href="/kason.github.io/">首页</a>
+        
+        <span class="sep">/</span>
+        <span>Agent 开发</span>
+        
+    </nav>
+    
+
+    <h1 class="page-title">LangGraph</h1>
+
+    <div class="page-content">
+        <h2 id="概述">概述</h2>
+
+<p>LangGraph 是 LangChain 团队推出的 Agent 编排框架，基于图（Graph）结构构建有状态、可循环的多步骤 AI 工作流，支持复杂 Agent 系统的开发。</p>
+
+<h2 id="核心概念">核心概念</h2>
+
+<h3 id="state状态">State（状态）</h3>
+<ul>
+  <li>整个图共享的状态对象</li>
+  <li>使用 TypedDict 定义</li>
+  <li>通过 reducer 函数定义状态更新规则</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+<span class="kn">from</span> <span class="nn">langgraph.graph.message</span> <span class="kn">import</span> <span class="n">add_messages</span>
+
+<span class="k">class</span> <span class="nc">State</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">messages</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">add_messages</span><span class="p">]</span>  <span class="c1"># 对话消息列表
+</span>    <span class="n">next_action</span><span class="p">:</span> <span class="nb">str</span>                         <span class="c1"># 下一步动作
+</span></code></pre></div></div>
+
+<h3 id="node节点">Node（节点）</h3>
+<ul>
+  <li>每个节点是一个函数，接收当前 State，返回 State 更新</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">chatbot</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">):</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">llm</span><span class="p">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s">"messages"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">"messages"</span><span class="p">:</span> <span class="p">[</span><span class="n">response</span><span class="p">]}</span>
+</code></pre></div></div>
+
+<h3 id="edge边">Edge（边）</h3>
+<ul>
+  <li><strong>普通边</strong>：从一个节点到另一个节点</li>
+  <li><strong>条件边</strong>：根据状态决定路由到哪个节点</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 普通边
+</span><span class="n">graph</span><span class="p">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s">"start"</span><span class="p">,</span> <span class="s">"chatbot"</span><span class="p">)</span>
+
+<span class="c1"># 条件边
+</span><span class="n">graph</span><span class="p">.</span><span class="n">add_conditional_edges</span><span class="p">(</span><span class="s">"chatbot"</span><span class="p">,</span> <span class="n">route_function</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s">"tools"</span><span class="p">:</span> <span class="s">"tools"</span><span class="p">,</span>
+    <span class="s">"end"</span><span class="p">:</span> <span class="n">END</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<h2 id="基础示例对话-agent">基础示例：对话 Agent</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langgraph.graph</span> <span class="kn">import</span> <span class="n">StateGraph</span><span class="p">,</span> <span class="n">START</span><span class="p">,</span> <span class="n">END</span>
+
+<span class="c1"># 1. 定义状态
+</span><span class="k">class</span> <span class="nc">State</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">messages</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">add_messages</span><span class="p">]</span>
+
+<span class="c1"># 2. 定义节点函数
+</span><span class="k">def</span> <span class="nf">chatbot</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">):</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">llm</span><span class="p">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s">"messages"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">"messages"</span><span class="p">:</span> <span class="p">[</span><span class="n">response</span><span class="p">]}</span>
+
+<span class="k">def</span> <span class="nf">should_continue</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">):</span>
+    <span class="n">last_message</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s">"messages"</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">last_message</span><span class="p">.</span><span class="n">tool_calls</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">"tools"</span>
+    <span class="k">return</span> <span class="n">END</span>
+
+<span class="c1"># 3. 构建图
+</span><span class="n">graph</span> <span class="o">=</span> <span class="n">StateGraph</span><span class="p">(</span><span class="n">State</span><span class="p">)</span>
+<span class="n">graph</span><span class="p">.</span><span class="n">add_node</span><span class="p">(</span><span class="s">"chatbot"</span><span class="p">,</span> <span class="n">chatbot</span><span class="p">)</span>
+<span class="n">graph</span><span class="p">.</span><span class="n">add_node</span><span class="p">(</span><span class="s">"tools"</span><span class="p">,</span> <span class="n">tool_node</span><span class="p">)</span>
+
+<span class="n">graph</span><span class="p">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">START</span><span class="p">,</span> <span class="s">"chatbot"</span><span class="p">)</span>
+<span class="n">graph</span><span class="p">.</span><span class="n">add_conditional_edges</span><span class="p">(</span><span class="s">"chatbot"</span><span class="p">,</span> <span class="n">should_continue</span><span class="p">)</span>
+<span class="n">graph</span><span class="p">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s">"tools"</span><span class="p">,</span> <span class="s">"chatbot"</span><span class="p">)</span>
+
+<span class="c1"># 4. 编译运行
+</span><span class="n">app</span> <span class="o">=</span> <span class="n">graph</span><span class="p">.</span><span class="nb">compile</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span><span class="s">"messages"</span><span class="p">:</span> <span class="p">[</span><span class="n">HumanMessage</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="s">"北京天气如何？"</span><span class="p">)]})</span>
+</code></pre></div></div>
+
+<h2 id="高级特性">高级特性</h2>
+
+<h3 id="1-human-in-the-loop人工干预">1. Human-in-the-Loop（人工干预）</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 编译时指定断点
+</span><span class="n">app</span> <span class="o">=</span> <span class="n">graph</span><span class="p">.</span><span class="nb">compile</span><span class="p">(</span><span class="n">interrupt_before</span><span class="o">=</span><span class="p">[</span><span class="s">"human_review"</span><span class="p">])</span>
+
+<span class="c1"># 运行到断点暂停
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="n">invoke</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+
+<span class="c1"># 人工审核后继续
+</span><span class="n">app</span><span class="p">.</span><span class="n">invoke</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s">"configurable"</span><span class="p">:</span> <span class="p">{</span><span class="s">"thread_id"</span><span class="p">:</span> <span class="s">"1"</span><span class="p">}})</span>
+</code></pre></div></div>
+
+<h3 id="2-持久化">2. 持久化</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langgraph.checkpoint.memory</span> <span class="kn">import</span> <span class="n">MemorySaver</span>
+
+<span class="n">checkpointer</span> <span class="o">=</span> <span class="n">MemorySaver</span><span class="p">()</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">graph</span><span class="p">.</span><span class="nb">compile</span><span class="p">(</span><span class="n">checkpointer</span><span class="o">=</span><span class="n">checkpointer</span><span class="p">)</span>
+
+<span class="c1"># 每次调用传入 thread_id
+</span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s">"configurable"</span><span class="p">:</span> <span class="p">{</span><span class="s">"thread_id"</span><span class="p">:</span> <span class="s">"thread-1"</span><span class="p">}}</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span><span class="s">"messages"</span><span class="p">:</span> <span class="p">[</span><span class="n">HumanMessage</span><span class="p">(</span><span class="s">"你好"</span><span class="p">)]},</span> <span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># 后续对话继续同一 thread
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span><span class="s">"messages"</span><span class="p">:</span> <span class="p">[</span><span class="n">HumanMessage</span><span class="p">(</span><span class="s">"接着聊"</span><span class="p">)]},</span> <span class="n">config</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-流式输出">3. 流式输出</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 流式输出 token
+</span><span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">app</span><span class="p">.</span><span class="n">stream</span><span class="p">({</span><span class="s">"messages"</span><span class="p">:</span> <span class="p">[</span><span class="n">HumanMessage</span><span class="p">(</span><span class="s">"写一首诗"</span><span class="p">)]},</span> <span class="n">config</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="4-多-agent-协作">4. 多 Agent 协作</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Supervisor 模式：一个主 Agent 调度子 Agent
+</span><span class="k">def</span> <span class="nf">supervisor</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">):</span>
+    <span class="c1"># 决定调用哪个子 Agent
+</span>    <span class="n">next_agent</span> <span class="o">=</span> <span class="n">llm_with_tools</span><span class="p">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s">"messages"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">"next_action"</span><span class="p">:</span> <span class="n">next_agent</span><span class="p">}</span>
+
+<span class="c1"># 定义子 Agent 节点
+</span><span class="n">graph</span><span class="p">.</span><span class="n">add_node</span><span class="p">(</span><span class="s">"researcher"</span><span class="p">,</span> <span class="n">researcher_agent</span><span class="p">)</span>
+<span class="n">graph</span><span class="p">.</span><span class="n">add_node</span><span class="p">(</span><span class="s">"coder"</span><span class="p">,</span> <span class="n">coder_agent</span><span class="p">)</span>
+<span class="n">graph</span><span class="p">.</span><span class="n">add_node</span><span class="p">(</span><span class="s">"supervisor"</span><span class="p">,</span> <span class="n">supervisor</span><span class="p">)</span>
+
+<span class="n">graph</span><span class="p">.</span><span class="n">add_conditional_edges</span><span class="p">(</span><span class="s">"supervisor"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s">"next_action"</span><span class="p">],</span> <span class="p">{</span>
+    <span class="s">"researcher"</span><span class="p">:</span> <span class="s">"researcher"</span><span class="p">,</span>
+    <span class="s">"coder"</span><span class="p">:</span> <span class="s">"coder"</span><span class="p">,</span>
+    <span class="s">"end"</span><span class="p">:</span> <span class="n">END</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<h2 id="常见-agent-架构">常见 Agent 架构</h2>
+
+<h3 id="react-agent">ReAct Agent</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>用户输入 → LLM 思考 → 选择工具 → 执行 → 观察 → 继续思考 → 最终回答
+</code></pre></div></div>
+
+<h3 id="multi-agent-架构">Multi-Agent 架构</h3>
+<p>| 模式 | 说明 |
+|——|——|
+| Supervisor | 一个主 Agent 调度多个子 Agent |
+| Swarm | Agent 之间直接交接控制权 |
+| Hierarchical | 多层 Supervisor 嵌套 |</p>
+
+<h3 id="规划型-agent">规划型 Agent</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>用户输入 → 制定计划 → 逐步执行 → 检查结果 → 修正 → 完成
+</code></pre></div></div>
+
+<h2 id="langgraph-vs-langchain">LangGraph vs LangChain</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>特性</th>
+      <th>LangChain</th>
+      <th>LangGraph</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>核心抽象</td>
+      <td>Chain（链）</td>
+      <td>Graph（图）</td>
+    </tr>
+    <tr>
+      <td>流程控制</td>
+      <td>线性管道</td>
+      <td>任意拓扑（含循环）</td>
+    </tr>
+    <tr>
+      <td>状态管理</td>
+      <td>无内置状态</td>
+      <td>内置 State + Checkpoint</td>
+    </tr>
+    <tr>
+      <td>适用场景</td>
+      <td>简单链式调用</td>
+      <td>复杂 Agent 工作流</td>
+    </tr>
+    <tr>
+      <td>人工干预</td>
+      <td>不原生支持</td>
+      <td>原生支持</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="常见面试题">常见面试题</h2>
+
+<ol>
+  <li>LangGraph 的核心概念（State、Node、Edge）？</li>
+  <li>LangGraph 和 LangChain 的区别？</li>
+  <li>如何实现 Human-in-the-Loop？</li>
+  <li>常见的 Multi-Agent 架构模式？</li>
+  <li>LangGraph 如何实现状态持久化？</li>
+</ol>
+
+<h2 id="参考资料">参考资料</h2>
+
+<ul>
+  <li><a href="https://langchain-ai.github.io/langgraph/">LangGraph 官方文档</a></li>
+  <li><a href="https://github.com/langchain-ai/langgraph">LangGraph GitHub</a></li>
+</ul>
+
+    </div>
+
+    <nav class="page-nav">
+        <a href="/kason.github.io/">&larr; 返回首页</a>
+    </nav>
+</article>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 KAISON 知识库</p>
+        </div>
+    </footer>
+</body>
+</html>

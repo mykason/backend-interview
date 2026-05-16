@@ -1,0 +1,29 @@
+---
+layout: default
+---
+<article class="knowledge-page">
+    {% if page.category %}
+    <nav class="breadcrumb">
+        <a href="{{ '/' | relative_url }}">首页</a>
+        {% if page.subcategory %}
+        <span class="sep">/</span>
+        <a href="{{ '/' | relative_url }}#{{ page.category | slugify }}">{{ page.category }}</a>
+        <span class="sep">/</span>
+        <span>{{ page.subcategory }}</span>
+        {% else %}
+        <span class="sep">/</span>
+        <span>{{ page.category }}</span>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    <h1 class="page-title">{{ page.title }}</h1>
+
+    <div class="page-content">
+        {{ content }}
+    </div>
+
+    <nav class="page-nav">
+        <a href="{{ '/' | relative_url }}">&larr; 返回首页</a>
+    </nav>
+</article>
