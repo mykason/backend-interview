@@ -45,4 +45,11 @@ title: "知识大纲"
     </ul>
   </div>
 
+  <div class="category-section">
+    <h2 id="leetcode">LeetCode</h2>
+    <ul class="item-list">
+      <li><a href="{{ '/leetcode/hot100' | relative_url }}">Hot 100</a></li>
+    </ul>
+  </div>
+
 </div>
