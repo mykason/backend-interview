@@ -1,3 +1,11 @@
+---
+layout: page
+title: "Java 基础"
+permalink: /backend/java-basic/base/
+category: 后端知识
+subcategory: JAVA 基础
+---
+
 # 1.谈谈你对泛型的理解和泛型的原理
 - **定义**:泛型就是参数化类型，把类型当作参数，在编译时指定，让类 / 方法 / 接口可以适配多种数据类型
 - **作用**:

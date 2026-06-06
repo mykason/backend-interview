@@ -1,49 +1,92 @@
 # Backend Interview
 
-> 后端开发 & Agent 开发知识汇总，基于 Jekyll 构建，部署于 GitHub Pages。
+> 后端开发、Agent 开发、面试准备与算法题知识库，基于 Jekyll 构建，部署于 GitHub Pages。
 
-## 项目结构
+## 在线目录
 
-```
-backend-interview/
-├── _config.yml              # Jekyll 站点配置
-├── _layouts/                # 页面布局模板
-│   ├── default.html         # 默认布局
-│   └── page.html            # 文章页布局
-├── assets/css/              # 样式文件
-├── backend/                 # 后端知识
-│   ├── java-basic/          # Java 基础
-│   │   ├── collection.md    # 集合
-│   │   ├── jvm.md           # JVM
-│   │   └── multithreading.md# 多线程
-│   ├── framework/           # 框架
-│   │   ├── spring-framework.md
-│   │   ├── spring-boot.md
-│   │   └── spring-cloud.md
-│   └── database/            # 数据库
-│       ├── mysql.md
-│       ├── redis.md
-│       ├── elasticsearch.md
-│       └── tidb.md
-├── agent/                   # Agent 开发
-│   ├── langchain.md
-│   └── langgraph.md
-├── index.md                 # 首页
-└── _site/                   # 构建产物（已忽略）
-```
-
-## 知识模块
+首页入口：`index.md`
 
 ### 后端知识
 
-- **Java 基础** — 集合、JVM、多线程
-- **框架** — Spring Framework、Spring Boot、Spring Cloud
-- **数据库** — MySQL、Redis、Elasticsearch、TiDB
+#### JAVA 基础
+
+- [Java 基础](backend/java-basic/base.md)
+- [集合](backend/java-basic/collection.md)
+- [JVM](backend/java-basic/jvm.md)
+- [多线程](backend/thread/multithreading.md)
+- [AOP](backend/java-basic/aop.md)
+
+#### 框架
+
+- [Spring Framework](backend/framework/spring-framework.md)
+- [Spring Boot](backend/framework/spring-boot.md)
+- [Spring Cloud](backend/framework/spring-cloud.md)
+
+#### 数据库
+
+- [MySQL](backend/database/mysql.md)
+- [Redis](backend/database/redis.md)
+- [Elasticsearch](backend/database/elasticsearch.md)
+- [TiDB](backend/database/tidb.md)
 
 ### Agent 开发
 
-- **LangChain** — LLM 应用开发框架
-- **LangGraph** — 多 Agent 工作流编排
+- [LangChain](agent/langchain.md)
+- [LangGraph](agent/langgraph.md)
+
+### 面试指南
+
+- [面试复习路径](guide/interview.md)
+
+### LeetCode
+
+- [Hot 100](leetcode/hot100.md)
+
+## 项目结构
+
+```text
+backend-interview/
+├── _config.yml                  # Jekyll 站点配置
+├── _layouts/                    # 页面布局模板
+│   ├── default.html             # 默认布局
+│   └── page.html                # 内容页布局
+├── assets/css/                  # 样式文件
+├── agent/                       # Agent 开发
+│   ├── langchain.md
+│   └── langgraph.md
+├── backend/                     # 后端知识
+│   ├── database/                # 数据库
+│   │   ├── elasticsearch.md
+│   │   ├── mysql.md
+│   │   ├── redis.md
+│   │   └── tidb.md
+│   ├── framework/               # 框架
+│   │   ├── spring-boot.md
+│   │   ├── spring-cloud.md
+│   │   └── spring-framework.md
+│   ├── java-basic/              # Java 基础
+│   │   ├── aop.md
+│   │   ├── base.md
+│   │   ├── collection.md
+│   │   └── jvm.md
+│   └── thread/
+│       └── multithreading.md
+├── guide/
+│   └── interview.md             # 面试指南
+├── leetcode/
+│   └── hot100.md                # 算法题
+├── index.md                     # GitHub Pages 首页
+└── README.md
+```
+
+## 本地预览
+
+```bash
+bundle install
+bundle exec jekyll serve
+```
+
+访问 `http://127.0.0.1:4000/backend-interview/`。
 
 ## 作者
 

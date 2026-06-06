@@ -11,9 +11,11 @@ title: "知识大纲"
     <div class="subcategory">
       <h3>JAVA 基础</h3>
       <ul class="item-list">
+        <li><a href="{{ '/backend/java-basic/base' | relative_url }}">Java 基础</a></li>
         <li><a href="{{ '/backend/java-basic/collection' | relative_url }}">集合</a></li>
         <li><a href="{{ '/backend/java-basic/jvm' | relative_url }}">JVM</a></li>
         <li><a href="{{ '/backend/java-basic/multithreading' | relative_url }}">多线程</a></li>
+        <li><a href="{{ '/backend/java-basic/aop' | relative_url }}">AOP</a></li>
       </ul>
     </div>
 
@@ -30,8 +32,8 @@ title: "知识大纲"
       <h3>数据库</h3>
       <ul class="item-list">
         <li><a href="{{ '/backend/database/mysql' | relative_url }}">MySQL</a></li>
-        <li><a href="{{ '/backend/database/elasticsearch' | relative_url }}">Elasticsearch</a></li>
         <li><a href="{{ '/backend/database/redis' | relative_url }}">Redis</a></li>
+        <li><a href="{{ '/backend/database/elasticsearch' | relative_url }}">Elasticsearch</a></li>
         <li><a href="{{ '/backend/database/tidb' | relative_url }}">TiDB</a></li>
       </ul>
     </div>
@@ -42,6 +44,13 @@ title: "知识大纲"
     <ul class="item-list">
       <li><a href="{{ '/agent/langchain' | relative_url }}">LangChain</a></li>
       <li><a href="{{ '/agent/langgraph' | relative_url }}">LangGraph</a></li>
+    </ul>
+  </div>
+
+  <div class="category-section">
+    <h2 id="面试指南">面试指南</h2>
+    <ul class="item-list">
+      <li><a href="{{ '/guide/interview' | relative_url }}">面试复习路径</a></li>
     </ul>
   </div>
 
