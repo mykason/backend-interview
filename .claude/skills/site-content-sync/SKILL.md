@@ -24,6 +24,7 @@ argument-hint: "[更新说明或新增内容范围]"
    - `agent/**/*.md`
    - `guide/**/*.md`
    - `leetcode/**/*.md`
+   - `woker/**/*.md`
    - 根目录必要 Markdown：`README.md`、`index.md`
 2. 站点配置与布局：
    - `_config.yml`
