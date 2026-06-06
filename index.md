@@ -40,6 +40,13 @@ title: "知识大纲"
   </div>
 
   <div class="category-section">
+    <h2 id="leetcode">LeetCode</h2>
+    <ul class="item-list">
+      <li><a href="{{ '/leetcode/hot100' | relative_url }}">Hot 100</a></li>
+    </ul>
+  </div>
+
+  <div class="category-section">
     <h2 id="agent开发">Agent 开发</h2>
     <ul class="item-list">
       <li><a href="{{ '/agent/langchain' | relative_url }}">LangChain</a></li>
@@ -51,13 +58,6 @@ title: "知识大纲"
     <h2 id="面试指南">面试指南</h2>
     <ul class="item-list">
       <li><a href="{{ '/guide/interview' | relative_url }}">面试复习路径</a></li>
-    </ul>
-  </div>
-
-  <div class="category-section">
-    <h2 id="leetcode">LeetCode</h2>
-    <ul class="item-list">
-      <li><a href="{{ '/leetcode/hot100' | relative_url }}">Hot 100</a></li>
     </ul>
   </div>
 
