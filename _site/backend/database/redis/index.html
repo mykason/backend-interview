@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redis - KAISON 知识库</title>
+    <title>Redis - kason的知识库</title>
     <meta name="description" content="后端开发 & Agent 开发知识汇总">
-    <link rel="stylesheet" href="/kason.github.io/assets/css/style.css">
+    <link rel="stylesheet" href="/backend-interview/assets/css/style.css">
 </head>
 <body>
     <header class="site-header">
         <div class="container">
-            <a href="/kason.github.io/" class="site-title">KAISON 知识库</a>
+            <a href="/backend-interview/" class="site-title">kason的知识库</a>
             <nav class="site-nav">
-                <a href="/kason.github.io/">首页</a>
-                <a href="https://github.com/hi-kai-fast" target="_blank">GitHub</a>
+                <a href="/backend-interview/">首页</a>
+                <a href="https://github.com/mykason" target="_blank">GitHub</a>
             </nav>
         </div>
     </header>
@@ -23,10 +23,10 @@
             <article class="knowledge-page">
     
     <nav class="breadcrumb">
-        <a href="/kason.github.io/">首页</a>
+        <a href="/backend-interview/">首页</a>
         
         <span class="sep">/</span>
-        <a href="/kason.github.io/#后端知识">后端知识</a>
+        <a href="/backend-interview/#后端知识">后端知识</a>
         <span class="sep">/</span>
         <span>数据库</span>
         
@@ -262,6 +262,12 @@ EVAL <span class="s2">"if redis.call('get', KEYS[1]) == ARGV[1] then return redi
   <li>缓存穿透、击穿、雪崩的解决方案？</li>
   <li>Redis Cluster 的分片原理？</li>
   <li>如何实现一个分布式锁？</li>
+  <li>redis 跳表的实现原理，并说说跳表为啥这么快?
+    <ul>
+      <li><strong>定义</strong>:跳表 = 多层有序链表，是一种有序、可随机近似二分查找的数据结构。Redis 里 zset（有序集合）底层就是跳表 + 哈希表。</li>
+      <li><strong>快</strong>:一是接近二分查找效率；二是结构简单，无树的旋转，CPU 缓存友好；三是天然适合有序范围查询、排行榜，非常契合 Redis zset 的场景；四是插入删除局部修改，并发性能好。</li>
+    </ul>
+  </li>
 </ol>
 
 <h2 id="参考资料">参考资料</h2>
@@ -274,7 +280,7 @@ EVAL <span class="s2">"if redis.call('get', KEYS[1]) == ARGV[1] then return redi
     </div>
 
     <nav class="page-nav">
-        <a href="/kason.github.io/">&larr; 返回首页</a>
+        <a href="/backend-interview/">&larr; 返回首页</a>
     </nav>
 </article>
 
@@ -283,7 +289,7 @@ EVAL <span class="s2">"if redis.call('get', KEYS[1]) == ARGV[1] then return redi
 
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2026 KAISON 知识库</p>
+            <p>&copy; 2026 kason的知识库</p>
         </div>
     </footer>
 </body>

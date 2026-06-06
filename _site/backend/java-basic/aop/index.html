@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AOP - kason的知识库</title>
+    <meta name="description" content="后端开发 & Agent 开发知识汇总">
+    <link rel="stylesheet" href="/backend-interview/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/backend-interview/" class="site-title">kason的知识库</a>
+            <nav class="site-nav">
+                <a href="/backend-interview/">首页</a>
+                <a href="https://github.com/mykason" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            <article class="knowledge-page">
+    
+    <nav class="breadcrumb">
+        <a href="/backend-interview/">首页</a>
+        
+        <span class="sep">/</span>
+        <a href="/backend-interview/#后端知识">后端知识</a>
+        <span class="sep">/</span>
+        <span>JAVA 基础</span>
+        
+    </nav>
+    
+
+    <h1 class="page-title">AOP</h1>
+
+    <div class="page-content">
+        <h1 id="aop">AOP</h1>
+
+<p>AOP（Aspect Oriented Programming，面向切面编程）是一种编程思想，用于将系统中与核心业务无关、但会被多个业务模块共同使用的逻辑抽取出来统一处理，例如日志、权限校验、事务、限流、缓存等。</p>
+
+<p>它的核心目标是：<strong>在不修改业务代码的前提下，对业务方法进行增强</strong>，从而减少重复代码，降低模块耦合度，提高系统的可维护性和扩展性。</p>
+
+<h2 id="为什么需要-aop">为什么需要 AOP</h2>
+
+<p>假设很多接口都需要记录请求日志，如果在每个业务方法中都手动写日志代码，会带来几个问题：</p>
+
+<ul>
+  <li>重复代码多，维护成本高</li>
+  <li>日志逻辑和业务逻辑混在一起，代码不清晰</li>
+  <li>后续修改日志格式时，需要改动大量业务代码</li>
+</ul>
+
+<p>使用 AOP 后，可以把日志逻辑统一放到一个切面中，由框架在目标方法执行前后自动织入日志逻辑。</p>
+
+<h2 id="aop-核心概念">AOP 核心概念</h2>
+
+<h3 id="切面aspect">切面（Aspect）</h3>
+
+<p>切面是对横切关注点的抽象，通常是一个类。</p>
+
+<p>例如：日志切面、权限切面、事务切面、限流切面。</p>
+
+<h3 id="连接点join-point">连接点（Join Point）</h3>
+
+<p>连接点表示程序执行过程中的某个点。在 Spring AOP 中，连接点通常指的是<strong>方法的执行</strong>。</p>
+
+<p>例如：调用 <code class="language-plaintext highlighter-rouge">UserService.getUser()</code> 方法这个动作就是一个连接点。</p>
+
+<h3 id="切点pointcut">切点（Pointcut）</h3>
+
+<p>切点用于定义哪些连接点需要被增强。</p>
+
+<p>例如：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Pointcut</span><span class="o">(</span><span class="s">"execution(* com.example.service.*.*(..))"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">serviceMethods</span><span class="o">()</span> <span class="o">{}</span>
+</code></pre></div></div>
+
+<p>表示匹配 <code class="language-plaintext highlighter-rouge">com.example.service</code> 包下所有类的所有方法。</p>
+
+<h3 id="通知advice">通知（Advice）</h3>
+
+<p>通知表示在目标方法的什么时机执行增强逻辑。</p>
+
+<p>常见通知类型：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@Before</code>：目标方法执行前执行</li>
+  <li><code class="language-plaintext highlighter-rouge">@After</code>：目标方法执行后执行，不管是否异常都会执行</li>
+  <li><code class="language-plaintext highlighter-rouge">@AfterReturning</code>：目标方法正常返回后执行</li>
+  <li><code class="language-plaintext highlighter-rouge">@AfterThrowing</code>：目标方法抛出异常后执行</li>
+  <li><code class="language-plaintext highlighter-rouge">@Around</code>：环绕通知，可以在目标方法执行前后都增强，也可以控制是否执行目标方法</li>
+</ul>
+
+<h3 id="目标对象target">目标对象（Target）</h3>
+
+<p>目标对象是被代理的原始业务对象。</p>
+
+<p>例如：<code class="language-plaintext highlighter-rouge">UserServiceImpl</code>。</p>
+
+<h3 id="代理对象proxy">代理对象（Proxy）</h3>
+
+<p>代理对象是 AOP 框架生成的对象，外部调用代理对象时，代理对象会在合适的时机执行增强逻辑，再调用目标对象。</p>
+
+<h3 id="织入weaving">织入（Weaving）</h3>
+
+<p>织入是指把切面逻辑应用到目标对象上的过程。</p>
+
+<p>Spring AOP 的织入发生在运行期，通过动态代理实现。</p>
+
+<h2 id="spring-aop-的实现原理">Spring AOP 的实现原理</h2>
+
+<p>Spring AOP 底层主要基于动态代理实现：</p>
+
+<ul>
+  <li>如果目标类实现了接口，默认使用 <strong>JDK 动态代理</strong></li>
+  <li>如果目标类没有实现接口，使用 <strong>CGLIB 动态代理</strong></li>
+</ul>
+
+<h3 id="jdk-动态代理">JDK 动态代理</h3>
+
+<p>JDK 动态代理基于接口生成代理类，要求目标类必须实现接口。</p>
+
+<p>特点：</p>
+
+<ul>
+  <li>Java 原生支持</li>
+  <li>只能代理接口方法</li>
+  <li>通过 <code class="language-plaintext highlighter-rouge">InvocationHandler</code> 处理方法调用</li>
+</ul>
+
+<h3 id="cglib-动态代理">CGLIB 动态代理</h3>
+
+<p>CGLIB 通过继承目标类生成子类代理对象。</p>
+
+<p>特点：</p>
+
+<ul>
+  <li>不要求目标类实现接口</li>
+  <li>不能代理 <code class="language-plaintext highlighter-rouge">final</code> 类</li>
+  <li>不能代理 <code class="language-plaintext highlighter-rouge">final</code> 方法，因为子类无法重写</li>
+</ul>
+
+<h2 id="aop-常见使用场景">AOP 常见使用场景</h2>
+
+<h3 id="统一日志管理">统一日志管理</h3>
+
+<p>通过 AOP 在接口调用前后统一记录请求参数、响应结果、耗时、异常信息等。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Aspect</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">LogAspect</span> <span class="o">{</span>
+
+    <span class="nd">@Around</span><span class="o">(</span><span class="s">"execution(* com.example.controller.*.*(..))"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Object</span> <span class="nf">log</span><span class="o">(</span><span class="nc">ProceedingJoinPoint</span> <span class="n">joinPoint</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Throwable</span> <span class="o">{</span>
+        <span class="kt">long</span> <span class="n">start</span> <span class="o">=</span> <span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">();</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="nc">Object</span> <span class="n">result</span> <span class="o">=</span> <span class="n">joinPoint</span><span class="o">.</span><span class="na">proceed</span><span class="o">();</span>
+            <span class="kt">long</span> <span class="n">cost</span> <span class="o">=</span> <span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">-</span> <span class="n">start</span><span class="o">;</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"method="</span> <span class="o">+</span> <span class="n">joinPoint</span><span class="o">.</span><span class="na">getSignature</span><span class="o">()</span> <span class="o">+</span> <span class="s">", cost="</span> <span class="o">+</span> <span class="n">cost</span> <span class="o">+</span> <span class="s">"ms"</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Throwable</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"method="</span> <span class="o">+</span> <span class="n">joinPoint</span><span class="o">.</span><span class="na">getSignature</span><span class="o">()</span> <span class="o">+</span> <span class="s">", error="</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+            <span class="k">throw</span> <span class="n">e</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="接口防刷和限流">接口防刷和限流</h3>
+
+<p>可以自定义注解，例如 <code class="language-plaintext highlighter-rouge">@RateLimit</code>，再通过 AOP 拦截带有该注解的方法，结合 Redis 或 Redisson 统计访问次数，实现接口防刷。</p>
+
+<p>核心思路：</p>
+
+<ol>
+  <li>定义限流注解，配置时间窗口和最大访问次数</li>
+  <li>AOP 拦截带注解的方法</li>
+  <li>根据用户 ID、IP、接口路径等生成限流 key</li>
+  <li>使用 Redis 记录访问次数并设置过期时间</li>
+  <li>超过阈值时拒绝请求</li>
+</ol>
+
+<h3 id="权限控制">权限控制</h3>
+
+<p>Spring Security 中的 <code class="language-plaintext highlighter-rouge">@PreAuthorize</code> 就是典型的 AOP 应用。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@PreAuthorize</span><span class="o">(</span><span class="s">"hasRole('ADMIN')"</span><span class="o">)</span>
+<span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/users"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">User</span><span class="o">&gt;</span> <span class="nf">listUsers</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">userService</span><span class="o">.</span><span class="na">listUsers</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>方法执行前会先进行权限判断，权限不足时直接拒绝访问。</p>
+
+<h3 id="事务管理">事务管理</h3>
+
+<p>Spring 的声明式事务 <code class="language-plaintext highlighter-rouge">@Transactional</code> 也是基于 AOP 实现的。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Transactional</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">transfer</span><span class="o">(</span><span class="nc">Long</span> <span class="n">fromUserId</span><span class="o">,</span> <span class="nc">Long</span> <span class="n">toUserId</span><span class="o">,</span> <span class="nc">BigDecimal</span> <span class="n">amount</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">accountService</span><span class="o">.</span><span class="na">deduct</span><span class="o">(</span><span class="n">fromUserId</span><span class="o">,</span> <span class="n">amount</span><span class="o">);</span>
+    <span class="n">accountService</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">toUserId</span><span class="o">,</span> <span class="n">amount</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Spring 会在方法执行前开启事务，方法正常执行完成后提交事务，发生异常时回滚事务。</p>
+
+<h3 id="缓存处理">缓存处理</h3>
+
+<p>Spring Cache 中的 <code class="language-plaintext highlighter-rouge">@Cacheable</code>、<code class="language-plaintext highlighter-rouge">@CacheEvict</code>、<code class="language-plaintext highlighter-rouge">@CachePut</code> 也可以理解为 AOP 思想的应用。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Cacheable</span><span class="o">(</span><span class="n">cacheNames</span> <span class="o">=</span> <span class="s">"user"</span><span class="o">,</span> <span class="n">key</span> <span class="o">=</span> <span class="s">"#id"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nc">User</span> <span class="nf">getUserById</span><span class="o">(</span><span class="nc">Long</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">userMapper</span><span class="o">.</span><span class="na">selectById</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>调用方法前先查询缓存，如果缓存命中则直接返回，不再执行目标方法。</p>
+
+<h2 id="aop-的优点">AOP 的优点</h2>
+
+<ul>
+  <li>降低重复代码，提高复用性</li>
+  <li>让业务逻辑和通用逻辑解耦</li>
+  <li>便于统一维护日志、权限、事务等横切逻辑</li>
+  <li>对原有业务代码侵入较小</li>
+</ul>
+
+<h2 id="aop-的缺点">AOP 的缺点</h2>
+
+<ul>
+  <li>过度使用会降低代码可读性，真实执行逻辑不够直观</li>
+  <li>动态代理会带来一定性能开销</li>
+  <li>调试链路相对复杂</li>
+  <li>Spring AOP 只支持方法级别的增强，不支持字段、构造器等更细粒度的连接点</li>
+</ul>
+
+<h2 id="spring-aop-常见失效场景">Spring AOP 常见失效场景</h2>
+
+<h3 id="同类方法内部调用">同类方法内部调用</h3>
+
+<p>AOP 是通过代理对象生效的，如果在同一个类中直接调用另一个被增强的方法，调用不会经过代理对象，AOP 就不会生效。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserService</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">methodA</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">methodB</span><span class="o">();</span> <span class="c1">// 直接调用当前对象方法，不经过代理</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Transactional</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">methodB</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">// 事务可能不生效</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>解决思路：</p>
+
+<ul>
+  <li>将被增强方法拆到另一个 Bean 中调用</li>
+  <li>通过 Spring 容器获取代理对象后再调用</li>
+</ul>
+
+<h3 id="方法不是-public">方法不是 public</h3>
+
+<p>Spring AOP 通常基于代理调用 public 方法。非 public 方法上的 AOP 注解可能不会按预期生效。</p>
+
+<h3 id="final-类或-final-方法">final 类或 final 方法</h3>
+
+<p>CGLIB 通过继承目标类并重写方法实现代理，因此 <code class="language-plaintext highlighter-rouge">final</code> 类和 <code class="language-plaintext highlighter-rouge">final</code> 方法无法被 CGLIB 正常代理。</p>
+
+<h3 id="对象不是-spring-bean">对象不是 Spring Bean</h3>
+
+<p>只有交给 Spring 容器管理的对象，才有机会被 Spring AOP 创建代理。如果对象是手动 <code class="language-plaintext highlighter-rouge">new</code> 出来的，AOP 不会生效。</p>
+
+<h2 id="spring-aop-和-aspectj-的区别">Spring AOP 和 AspectJ 的区别</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>对比项</th>
+      <th>Spring AOP</th>
+      <th>AspectJ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>实现方式</td>
+      <td>动态代理</td>
+      <td>编译期、类加载期或运行期织入</td>
+    </tr>
+    <tr>
+      <td>连接点</td>
+      <td>主要支持方法执行</td>
+      <td>支持方法、构造器、字段等更多连接点</td>
+    </tr>
+    <tr>
+      <td>使用成本</td>
+      <td>低，和 Spring 集成简单</td>
+      <td>相对更高</td>
+    </tr>
+    <tr>
+      <td>功能能力</td>
+      <td>较轻量</td>
+      <td>更强大</td>
+    </tr>
+    <tr>
+      <td>适用场景</td>
+      <td>常见业务增强，如日志、事务、权限</td>
+      <td>复杂切面需求</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="常见面试题">常见面试题</h2>
+
+<h3 id="1-aop-是什么">1. AOP 是什么？</h3>
+
+<p>AOP 是面向切面编程，用于把日志、权限、事务、限流等横切逻辑从业务代码中抽离出来，通过动态代理在目标方法执行前后进行增强。</p>
+
+<h3 id="2-spring-aop-的底层原理是什么">2. Spring AOP 的底层原理是什么？</h3>
+
+<p>Spring AOP 底层主要基于动态代理。如果目标类实现了接口，默认使用 JDK 动态代理；如果没有实现接口，则使用 CGLIB 代理。代理对象会在调用目标方法前后执行切面逻辑。</p>
+
+<h3 id="3-jdk-动态代理和-cglib-有什么区别">3. JDK 动态代理和 CGLIB 有什么区别？</h3>
+
+<p>JDK 动态代理基于接口，只能代理接口方法；CGLIB 基于继承生成目标类的子类，不要求接口，但不能代理 final 类和 final 方法。</p>
+
+<h3 id="4-aop-为什么会出现同类方法调用失效">4. AOP 为什么会出现同类方法调用失效？</h3>
+
+<p>因为 Spring AOP 是通过代理对象增强的。同类内部方法调用使用的是当前对象 <code class="language-plaintext highlighter-rouge">this</code>，不会经过 Spring 代理对象，所以切面逻辑不会执行。</p>
+
+<h3 id="5-transactional-为什么有时不生效">5. <code class="language-plaintext highlighter-rouge">@Transactional</code> 为什么有时不生效？</h3>
+
+<p>常见原因包括：同类方法内部调用、方法不是 public、异常被捕获没有继续抛出、抛出的异常类型默认不触发回滚、对象不是 Spring Bean 等。</p>
+
+<h3 id="6-around-和-before-有什么区别">6. <code class="language-plaintext highlighter-rouge">@Around</code> 和 <code class="language-plaintext highlighter-rouge">@Before</code> 有什么区别？</h3>
+
+<p><code class="language-plaintext highlighter-rouge">@Before</code> 只能在目标方法执行前增强，不能控制目标方法是否执行；<code class="language-plaintext highlighter-rouge">@Around</code> 可以在方法执行前后增强，并且可以通过 <code class="language-plaintext highlighter-rouge">proceed()</code> 控制目标方法是否执行。</p>
+
+<h2 id="小结">小结</h2>
+
+<p>AOP 的本质是通过代理机制对目标方法进行增强。它适合处理日志、权限、事务、限流、缓存等横切逻辑，但不适合承载核心业务逻辑。使用时要注意代理失效场景，尤其是同类方法内部调用、非 Spring Bean、final 方法等问题。</p>
+
+    </div>
+
+    <nav class="page-nav">
+        <a href="/backend-interview/">&larr; 返回首页</a>
+    </nav>
+</article>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 kason的知识库</p>
+        </div>
+    </footer>
+</body>
+</html>
