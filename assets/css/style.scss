@@ -104,6 +104,11 @@ a {
 
 /* ===== Home Page - Outline ===== */
 .home-outline {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
+    gap: 24px;
+    align-items: start;
+
     h2 {
         font-size: 1.4rem;
         margin-bottom: 20px;
@@ -294,6 +299,10 @@ a {
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
+    .home-outline {
+        display: block;
+    }
+
     .knowledge-page {
         padding: 20px 16px;
     }
