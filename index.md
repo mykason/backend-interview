@@ -61,6 +61,13 @@ title: "知识大纲"
         <li><a href="{{ '/guide/interview' | relative_url }}">面试复习路径</a></li>
       </ul>
     </div>
+
+    <div class="category-section">
+      <h2 id="职场成长">职场成长</h2>
+      <ul class="item-list">
+        <li><a href="{{ '/woker/aboutPerformance' | relative_url }}">如何在绩效考核中脱颖而出</a></li>
+      </ul>
+    </div>
   </div>
 
 </div>

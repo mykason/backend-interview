@@ -42,6 +42,10 @@
 
 - [Hot 100](leetcode/hot100.md)
 
+### 职场成长
+
+- [如何在绩效考核中脱颖而出](woker/aboutPerformance.md)
+
 ## 项目结构
 
 ```text
@@ -75,6 +79,8 @@ backend-interview/
 │   └── interview.md             # 面试指南
 ├── leetcode/
 │   └── hot100.md                # 算法题
+├── woker/
+│   └── aboutPerformance.md      # 职场成长
 ├── index.md                     # GitHub Pages 首页
 └── README.md
 ```

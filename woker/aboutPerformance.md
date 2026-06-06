@@ -1,3 +1,10 @@
+---
+layout: page
+title: "如何在绩效考核中脱颖而出"
+permalink: /woker/aboutPerformance/
+category: 职场成长
+---
+
 # 如何在绩效考核中脱颖而出？
 
 对于职场人来说，绩效考核是一个绕不开的话题，几乎所有公司都有一套绩效考核方法。
