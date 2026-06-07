@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kafka - kason的知识库</title>
+    <meta name="description" content="后端开发 & Agent 开发知识汇总">
+    <link rel="stylesheet" href="/backend-interview/assets/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/backend-interview/" class="site-title">kason的知识库</a>
+            <nav class="site-nav">
+                <a href="/backend-interview/">首页</a>
+                <a href="https://github.com/mykason" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            <article class="knowledge-page">
+    
+    <nav class="breadcrumb">
+        <a href="/backend-interview/">首页</a>
+        
+        <span class="sep">/</span>
+        <a href="/backend-interview/#后端知识">后端知识</a>
+        <span class="sep">/</span>
+        <span>中间件</span>
+        
+    </nav>
+    
+
+    <h1 class="page-title">Kafka</h1>
+
+    <div class="page-content">
+        <h1 id="kafka-如何保证高吞吐">Kafka 如何保证高吞吐？</h1>
+
+<h2 id="磁盘顺序读写">磁盘顺序读写</h2>
+
+<p>Kafka 将消息追加（Append）到日志文件末尾，避免磁盘磁头频繁寻道（Seek Time），极大提升写入速度。</p>
+
+<h2 id="零拷贝技术zero-copy">零拷贝技术（Zero-Copy）</h2>
+
+<p>传统网络数据发送需要经历：</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>磁盘 -&gt; 内核层（Read Buffer）-&gt; 用户层（Application Buffer）-&gt; 内核层（Socket Buffer）-&gt; 网卡
+</code></pre></div></div>
+
+<p>这个过程涉及多次 CPU 上下文切换和数据拷贝。</p>
+
+<p>Kafka 在消费者拉取数据时，利用 Linux 的 <code class="language-plaintext highlighter-rouge">sendfile</code> 系统调用，数据可以直接从操作系统页缓存（Page Cache）拷贝到网卡，绕过用户态进程（JVM）。这样可以减少 CPU 上下文切换和内存拷贝次数，提升网络数据传输效率。</p>
+
+<h2 id="充分利用操作系统页缓存page-cache">充分利用操作系统页缓存（Page Cache）</h2>
+
+<p>Kafka 并没有在 JVM 内存中维护大量缓存结构，而是将数据交给操作系统的 Page Cache 管理。</p>
+
+<ul>
+  <li>生产者写入数据时，通常写入 Page Cache 后就直接返回，由操作系统异步刷盘。</li>
+  <li>消费者读取数据时，如果数据刚刚写入，通常可以直接从 Page Cache 命中，相当于在内存中完成交互。</li>
+</ul>
+
+<h2 id="批处理与压缩batching--compression">批处理与压缩（Batching &amp; Compression）</h2>
+
+<p>Kafka Producer 并不是来一条消息就发送一条，而是将消息放入内存池（RecordAccumulator）中。</p>
+
+<p>通过配置：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">batch.size</code>：批次大小</li>
+  <li><code class="language-plaintext highlighter-rouge">linger.ms</code>：等待时间</li>
+</ul>
+
+<p>可以将多条消息打包成一个批次一次性发送，从而减少网络 IO 次数。</p>
+
+<p>配合批处理，Kafka 支持在 Producer 端对整个批次的数据进行压缩，例如 Snappy、LZ4、Zstd。</p>
+
+<h2 id="分区架构与并发partitioning">分区架构与并发（Partitioning）</h2>
+
+<p>Kafka 的 Topic 会被划分为多个 Partition，这些 Partition 可以分布在集群中的不同 Broker 上。</p>
+
+<p>这种设计天然支持水平扩展：</p>
+
+<ul>
+  <li>Producer 可以针对不同 Partition 并发写入。</li>
+  <li>Consumer 可以针对不同 Partition 并发读取。</li>
+  <li>增加 Partition 数量和对应机器后，可以线性提升整体集群吞吐量。</li>
+</ul>
+
+<h1 id="kafka-如何保证消息不丢失">Kafka 如何保证消息不丢失？</h1>
+
+<h2 id="生产端">生产端</h2>
+
+<ul>
+  <li>将 <code class="language-plaintext highlighter-rouge">acks</code> 设置为 <code class="language-plaintext highlighter-rouge">all</code>。</li>
+  <li>开启重试机制。</li>
+  <li>使用带 Callback 的发送 API，确认消息确实到达 Kafka 集群。</li>
+</ul>
+
+<h2 id="broker-端">Broker 端</h2>
+
+<ul>
+  <li>Topic 至少设置 3 个副本。</li>
+  <li>将 <code class="language-plaintext highlighter-rouge">min.insync.replicas</code> 设置为 2 以上。</li>
+  <li>关闭不干净的 Leader 选举，防止脑裂和数据截断。</li>
+</ul>
+
+<h2 id="消费端">消费端</h2>
+
+<ul>
+  <li>关闭自动提交。</li>
+  <li>在业务逻辑完全处理成功后，再手动提交 Offset。</li>
+  <li>实现 <code class="language-plaintext highlighter-rouge">At-Least-Once</code>（至少一次）语义。</li>
+  <li>如果存在重复消费风险，需要在下游业务侧做幂等处理。</li>
+</ul>
+
+<p>这套组合可以最大限度降低消息丢失风险。</p>
+
+    </div>
+
+    <nav class="page-nav">
+        <a href="/backend-interview/">&larr; 返回首页</a>
+    </nav>
+</article>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 kason的知识库</p>
+        </div>
+    </footer>
+</body>
+</html>

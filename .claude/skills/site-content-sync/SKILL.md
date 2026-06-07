@@ -21,6 +21,7 @@ argument-hint: "[更新说明或新增内容范围]"
 
 1. 所有内容 Markdown：
    - `backend/**/*.md`
+   - `backend/middleware/**/*.md`（必须重点检查，不能遗漏 Kafka/Redis 等中间件内容）
    - `agent/**/*.md`
    - `guide/**/*.md`
    - `leetcode/**/*.md`
@@ -50,6 +51,7 @@ argument-hint: "[更新说明或新增内容范围]"
 ### 1. 扫描 Markdown 内容
 
 - 使用 Glob/Grep/Read 读取所有内容目录的 `.md` 文件。
+- `backend/middleware/**/*.md` 必须单独核对一次；即使 `backend/**/*.md` 已覆盖，也要确认 `backend/middleware/Kafka.md`、`backend/middleware/Redis.md` 等文件进入 README 和 index。
 - 读取每个页面 front matter：`title`、`layout`、`permalink`、`category`、`subcategory`。
 - 如果页面没有 `title`，优先从一级标题 `# ...` 推断。
 - 不要把 `_site` 里的生成文件当作内容来源。
@@ -79,6 +81,8 @@ argument-hint: "[更新说明或新增内容范围]"
   <li><a href="{{ '/leetcode/hot100' | relative_url }}">Hot 100</a></li>
   ```
 
+- 链接路径必须与页面 `permalink` 对齐；如果页面有 `permalink`，优先使用去掉末尾 `/` 的 permalink，而不是按文件路径猜测。
+- 对大小写敏感路径必须保持一致，例如 `backend/middleware/Kafka.md` 对应 `{{ '/backend/middleware/Kafka' | relative_url }}`。
 - 不要写死完整线上 URL。
 - 不要写成 `.md` 后缀链接。
 - 新分类优先放到合适的现有区域。
@@ -147,6 +151,9 @@ PATH="/opt/homebrew/opt/ruby/bin:$PATH" bundle install
 - `_site/index.html` 是否包含 `.side-sections`。
 - `_site/assets/css/style.css` 是否包含 `.home-outline { display: grid; ... }`。
 - LeetCode 和 面试指南是否在生成 HTML 中存在。
+- 首页所有内容链接对应的 `_site` 产物是否存在，尤其是 `/backend/middleware/Kafka/` 和 `/backend/middleware/Redis/`，避免 GitHub Pages 点击后 404。
+- 如果源文件缺少 `layout: page` 或 `permalink` 导致未按首页链接生成页面，必须补齐 front matter，而不是只改链接。
+- 对大小写敏感文件名，必须同时核对源文件名、`permalink`、`index.md` 链接和 `_site` 输出目录大小写一致。
 
 ### 7. GitHub Pages 线上验证
 
@@ -160,6 +167,8 @@ PATH="/opt/homebrew/opt/ruby/bin:$PATH" bundle install
 - 线上 HTML 包含 LeetCode。
 - 线上 HTML 包含 面试指南。
 - 线上 HTML 包含 `.side-sections`。
+- 线上 HTML 包含 `/backend/middleware/Kafka` 和 `/backend/middleware/Redis` 链接。
+- 线上 Kafka、Redis 中间件页面不是 404。
 - 线上 CSS 包含 `.home-outline` 的 grid 样式。
 
 如果 GitHub raw `main` 分支已有新内容，但线上页面没有，优先判断为 GitHub Pages 没有部署最新构建结果。
