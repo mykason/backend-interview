@@ -29,6 +29,11 @@
 - [Elasticsearch](backend/database/elasticsearch.md)
 - [TiDB](backend/database/tidb.md)
 
+#### 中间件
+
+- [Kafka](backend/middleware/Kafka.md)
+- [Redis](backend/middleware/Redis.md)
+
 ### Agent 开发
 
 - [LangChain](agent/langchain.md)
@@ -73,6 +78,9 @@ backend-interview/
 │   │   ├── base.md
 │   │   ├── collection.md
 │   │   └── jvm.md
+│   ├── middleware/              # 中间件
+│   │   ├── Kafka.md
+│   │   └── Redis.md
 │   └── thread/
 │       └── multithreading.md
 ├── guide/

@@ -37,6 +37,14 @@ title: "知识大纲"
         <li><a href="{{ '/backend/database/tidb' | relative_url }}">TiDB</a></li>
       </ul>
     </div>
+
+    <div class="subcategory">
+      <h3>中间件</h3>
+      <ul class="item-list">
+        <li><a href="{{ '/backend/middleware/Kafka' | relative_url }}">Kafka</a></li>
+        <li><a href="{{ '/backend/middleware/Redis' | relative_url }}">Redis</a></li>
+      </ul>
+    </div>
   </div>
 
   <div class="side-sections">
